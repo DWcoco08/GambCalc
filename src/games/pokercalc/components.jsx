@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { buyInChips } from './logic'
 
-const ROUND_NAMES = ['Tạo hủ', 'Xem lá 4', 'Xem lá 5 + Show']
+const ROUND_NAMES = ['Tạo hủ', 'Xem lá 4', 'Xem lá 5', 'Show']
 
 export default function PokerCalcBoard({ players, onAction, onViewPlayer, match }) {
   const [roundChips, setRoundChips] = useState({}) // chips being added this round
@@ -51,7 +51,7 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
     setTotalPot(newTotal)
     setRoundChips({})
 
-    if (roundNum >= 2) {
+    if (roundNum >= 3) {
       // Last round → go to winner
       setPhase('winner')
     } else {
@@ -61,7 +61,7 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
 
   // Skip round (no extra chips this round)
   const skipRound = () => {
-    if (roundNum >= 2) {
+    if (roundNum >= 3) {
       setPhase('winner')
     } else {
       setRoundNum(prev => prev + 1)
@@ -104,7 +104,7 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
           <div>
             <div className="text-sm font-extrabold text-white/90">Ván {handNum}</div>
             <div className="text-[10px] text-white/40">
-              {phase === 'winner' ? 'Chọn người thắng' : `Lượt ${roundNum + 1}/3 · ${ROUND_NAMES[roundNum]}`}
+              {phase === 'winner' ? 'Chọn người thắng' : `Lượt ${roundNum + 1}/4 · ${ROUND_NAMES[roundNum]}`}
             </div>
           </div>
         </div>
@@ -227,14 +227,14 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
             {roundPot > 0 && (
               <button onClick={confirmRound}
                 className="flex-1 py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-yellow-500/30 touch-bounce text-sm">
-                {roundNum >= 2 ? `🏆 Gom hủ ${displayPot} → Chọn người thắng` : `✓ Xác nhận +${roundPot} · Lượt tiếp →`}
+                {roundNum >= 3 ? `🏆 Gom hủ ${displayPot} → Chọn người thắng` : `✓ Xác nhận +${roundPot} · Lượt tiếp →`}
               </button>
             )}
             {/* Skip (no extra chips this round) - only after round 0 */}
             {roundNum > 0 && roundPot === 0 && (
               <button onClick={skipRound}
                 className="flex-1 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/30 touch-bounce text-sm">
-                {roundNum >= 2 ? `🏆 Gom hủ ${displayPot} → Chọn người thắng` : `Không thêm · Lượt tiếp →`}
+                {roundNum >= 3 ? `🏆 Gom hủ ${displayPot} → Chọn người thắng` : `Không thêm · Lượt tiếp →`}
               </button>
             )}
           </div>
