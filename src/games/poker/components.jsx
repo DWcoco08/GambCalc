@@ -4,21 +4,19 @@ import { placeBets, placeRaise, placeCall, awardPot, buyInChips } from './logic'
 const ROUND_LABELS = ['', 'Vòng 1 · Xem 3 lá', 'Vòng 2 · Lá thứ 4', 'Vòng 3 · Lá thứ 5']
 
 export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, disabled, match }) {
-  const [bets, setBets] = useState({}) // pre-game bets (before chips deducted)
+  const [bets, setBets] = useState({})
   const [phase, setPhase] = useState('betting')
   const [folded, setFolded] = useState({})
   const [roundNum, setRoundNum] = useState(0)
   const [pot, setPot] = useState(0)
-  const [pendingRaise, setPendingRaise] = useState(null)
+  const [pendingRaise, setPendingRaise] = useState(null) // { playerId, amount, playerName }
   const [respondedToRaise, setRespondedToRaise] = useState({})
   const [raisePlayer, setRaisePlayer] = useState(null)
-  const [roundRaised, setRoundRaised] = useState(false) // has this round already had a resolved raise?
 
   const prePot = Object.values(bets).reduce((sum, b) => sum + b, 0)
   const playersWithBets = players.filter(p => phase === 'betting' ? (bets[p.id] || 0) > 0 : true)
-  const activePlayers = phase === 'betting' ? playersWithBets : players.filter(p => !folded[p.id] && (p.gameState?.inHand))
+  const inHandPlayers = players.filter(p => p.gameState?.inHand && !folded[p.id])
 
-  // Add bet in pre-game phase (not yet deducted)
   const addBet = (playerId, amount) => {
     const player = players.find(p => p.id === playerId)
     const currentBet = bets[playerId] || 0
@@ -32,31 +30,25 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
     setBets(prev => { const n = { ...prev }; delete n[playerId]; return n })
   }
 
-  // Start game: deduct chips immediately, enter round 1
   const startRounds = () => {
     const betPlayers = players.filter(p => (bets[p.id] || 0) > 0)
     if (betPlayers.length < 2) return
-
     const totalBet = Object.values(bets).reduce((sum, b) => sum + b, 0)
-
-    // Deduct chips from all bettors
     onAction(null, null, () => {
       const result = placeBets(players, bets)
-      // Mark players in hand
       result.players = result.players.map(p => ({
         ...p,
         gameState: { ...p.gameState, inHand: (bets[p.id] || 0) > 0 },
       }))
       return result
     })
-
     setPot(totalBet)
     setBets({})
     setFolded({})
     setRoundNum(1)
     setPendingRaise(null)
     setRespondedToRaise({})
-    setRoundRaised(false)
+    setRaisePlayer(null)
     setPhase('round')
   }
 
@@ -66,7 +58,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
     if (pendingRaise) {
       const newResponded = { ...respondedToRaise, [playerId]: true }
       setRespondedToRaise(newResponded)
-      checkRaiseResolved(newFolded, newResponded)
+      checkAllResponded(newFolded, newResponded)
     }
     const remaining = players.filter(p => p.gameState?.inHand && !newFolded[p.id])
     if (remaining.length <= 1) {
@@ -79,11 +71,9 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
     const player = players.find(p => p.id === playerId)
     const actual = Math.min(amount, player?.gameState?.chips || 0)
     if (actual <= 0) return
-
-    // Deduct chips immediately
     onAction(null, null, () => placeRaise(players, playerId, actual))
-
     setPot(prev => prev + actual)
+    // Everyone else (active, not folded, has chips) must respond
     setPendingRaise({ playerId, amount: actual, playerName: player.name })
     setRespondedToRaise({ [playerId]: true })
     setRaisePlayer(null)
@@ -93,25 +83,38 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
     if (!pendingRaise) return
     const player = players.find(p => p.id === playerId)
     const actual = Math.min(pendingRaise.amount, player?.gameState?.chips || 0)
-
-    // Deduct chips immediately
     onAction(null, null, () => placeCall(players, playerId, actual))
-
     setPot(prev => prev + actual)
     const newResponded = { ...respondedToRaise, [playerId]: true }
     setRespondedToRaise(newResponded)
-    checkRaiseResolved(folded, newResponded)
+    checkAllResponded(folded, newResponded)
   }
 
-  const checkRaiseResolved = (currentFolded, currentResponded) => {
+  // Re-raise: someone who already responded now raises more
+  const handleReRaise = (playerId, amount) => {
+    const player = players.find(p => p.id === playerId)
+    const actual = Math.min(amount, player?.gameState?.chips || 0)
+    if (actual <= 0) return
+    onAction(null, null, () => placeRaise(players, playerId, actual))
+    setPot(prev => prev + actual)
+    // Reset: everyone must respond again except re-raiser
+    setPendingRaise({ playerId, amount: actual, playerName: player.name })
+    setRespondedToRaise({ [playerId]: true })
+    setRaisePlayer(null)
+  }
+
+  const checkAllResponded = (currentFolded, currentResponded) => {
     const needToRespond = players.filter(p =>
       p.gameState?.inHand && !currentFolded[p.id] && !currentResponded[p.id] && (p.gameState?.chips || 0) > 0
     )
     if (needToRespond.length === 0) {
       setPendingRaise(null)
       setRespondedToRaise({})
-      setRoundRaised(true)
     }
+  }
+
+  const handleBuyIn = (playerId) => {
+    onAction(null, null, () => buyInChips(players, playerId))
   }
 
   const nextRound = () => {
@@ -119,16 +122,12 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
     else setRoundNum(prev => prev + 1)
     setPendingRaise(null)
     setRespondedToRaise({})
-    setRoundRaised(false)
+    setRaisePlayer(null)
   }
 
   const handleSelectWinner = (winnerId) => {
     onAction(null, null, () => awardPot(players, winnerId, pot))
     resetAll()
-  }
-
-  const handleBuyIn = (playerId) => {
-    onAction(null, null, () => buyInChips(players, playerId))
   }
 
   const resetAll = () => {
@@ -139,11 +138,9 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
     setPendingRaise(null)
     setRespondedToRaise({})
     setRaisePlayer(null)
-    setRoundRaised(false)
     setPhase('betting')
   }
 
-  const inHandPlayers = players.filter(p => p.gameState?.inHand && !folded[p.id])
   const canNextRound = !pendingRaise
 
   return (
@@ -202,7 +199,8 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
                 )}
                 {phase === 'betting' && preBet > 0 && <div className="text-[9px] text-yellow-300 font-bold">đặt: {preBet}</div>}
                 {isFolded && <div className="text-[9px] text-red-400 font-bold uppercase">Bỏ</div>}
-                {chips <= 0 && phase === 'betting' && (
+                {/* Buy-in: show in betting phase OR during round when 0 chips */}
+                {chips <= 0 && !isFolded && (
                   <button onClick={(e) => { e.stopPropagation(); handleBuyIn(player.id) }}
                     className="mt-1 px-2 py-0.5 rounded-lg text-[8px] font-bold bg-purple-500/30 text-purple-300 touch-bounce">
                     +Mua 50
@@ -234,12 +232,17 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
               const chips = player.gameState?.chips || 0
               const currentBet = bets[player.id] || 0
               const available = chips - currentBet
-              if (chips <= 0) return null
+              if (chips <= 0) return (
+                <div key={player.id} className="flex items-center justify-between px-1 opacity-50">
+                  <span className="text-xs font-bold text-white/40">{player.name} <span className="text-red-400">hết chip</span></span>
+                  <button onClick={() => handleBuyIn(player.id)} className="text-[10px] font-bold text-purple-400 touch-bounce">+Mua 50</button>
+                </div>
+              )
               return (
                 <div key={player.id} className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white/80">
-                      {player.name} <span className="text-white/30">({chips} chip, còn {available})</span>
+                      {player.name} <span className="text-white/30">({chips}, còn {available})</span>
                     </span>
                     <span className="text-xs font-extrabold text-yellow-400">{currentBet || '—'}</span>
                   </div>
@@ -283,6 +286,8 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
               const chips = p.gameState?.chips || 0
               const hasChips = chips > 0
               const needsRespond = pendingRaise && !isFolded && !respondedToRaise[p.id] && p.id !== pendingRaise.playerId
+              const hasResponded = pendingRaise && respondedToRaise[p.id] && p.id !== pendingRaise.playerId
+
               return (
                 <div key={p.id} className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
                   isFolded ? 'bg-white/5 opacity-40'
@@ -294,25 +299,40 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
                       {p.name}
                     </span>
                     <span className={`text-[10px] font-bold ${chips === 0 ? 'text-red-400' : 'text-yellow-400/70'}`}>🪙{chips}</span>
-                    {!hasChips && !isFolded && <span className="text-[9px] text-red-400/60">hết chip</span>}
+                    {!hasChips && !isFolded && (
+                      <button onClick={() => handleBuyIn(p.id)}
+                        className="text-[9px] font-bold text-purple-400 bg-purple-500/20 px-1.5 py-0.5 rounded touch-bounce">
+                        +Mua 50
+                      </button>
+                    )}
                   </div>
                   <div className="flex gap-1.5 shrink-0">
+                    {/* Needs to respond to raise */}
                     {!isFolded && needsRespond && hasChips && (
                       <button onClick={() => handleCallRaise(p.id)}
                         className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-blue-500/30 text-blue-300 hover:bg-blue-500/40 touch-bounce">
                         👁 Theo {Math.min(pendingRaise.amount, chips)}
                       </button>
                     )}
-                    {!isFolded && needsRespond && !hasChips && (
-                      <span className="text-[10px] text-red-400/60 font-bold">Hết chip</span>
+                    {/* Already responded - can re-raise */}
+                    {!isFolded && hasResponded && hasChips && !raisePlayer && (
+                      <button onClick={() => setRaisePlayer(p.id)}
+                        className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-orange-500/20 text-orange-400 touch-bounce">
+                        ⬆ Tố lại
+                      </button>
                     )}
-                    {!isFolded && !needsRespond && !pendingRaise && !roundRaised && hasChips && (
-                      <button onClick={() => setRaisePlayer(raisePlayer === p.id ? null : p.id)}
-                        className={`px-3 py-1.5 rounded-lg text-[10px] font-bold touch-bounce ${
-                          raisePlayer === p.id ? 'bg-orange-500/40 text-orange-300' : 'bg-orange-500/20 text-orange-400'}`}>
+                    {/* No pending raise - can raise */}
+                    {!isFolded && !pendingRaise && hasChips && !raisePlayer && (
+                      <button onClick={() => setRaisePlayer(p.id)}
+                        className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-orange-500/20 text-orange-400 touch-bounce">
                         ⬆ Tố
                       </button>
                     )}
+                    {/* No chips */}
+                    {!isFolded && needsRespond && !hasChips && (
+                      <span className="text-[10px] text-red-400/60 font-bold">Hết chip</span>
+                    )}
+                    {/* Fold button */}
                     {!isFolded && (
                       <button onClick={() => handleFold(p.id)}
                         className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-red-500/20 text-red-400 touch-bounce">
@@ -326,6 +346,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
             })}
           </div>
 
+          {/* Raise amount selector */}
           {raisePlayer && (
             <div className="mb-4 p-3 bg-orange-500/10 border border-orange-400/20 rounded-xl animate-fade-in">
               <p className="text-[10px] text-orange-400 font-bold mb-2">
@@ -335,7 +356,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
                 {[1, 2, 3, 5].map(n => {
                   const rp = players.find(p => p.id === raisePlayer)
                   return (
-                    <button key={n} onClick={() => handleRaise(raisePlayer, n)}
+                    <button key={n} onClick={() => pendingRaise ? handleReRaise(raisePlayer, n) : handleRaise(raisePlayer, n)}
                       disabled={(rp?.gameState?.chips || 0) < n}
                       className="px-3 py-2 rounded-lg text-xs font-bold bg-orange-500/30 text-orange-300 hover:bg-orange-500/50 touch-bounce disabled:opacity-20">
                       +{n}
@@ -348,6 +369,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
             </div>
           )}
 
+          {/* Next round / showdown */}
           {!raisePlayer && (
             <div className="flex gap-2">
               {canNextRound && roundNum < 3 && (
