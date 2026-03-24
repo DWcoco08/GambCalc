@@ -9,13 +9,22 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
   const [folded, setFolded] = useState({})
   const [roundNum, setRoundNum] = useState(0)
   const [pot, setPot] = useState(0)
-  const [pendingRaise, setPendingRaise] = useState(null) // { playerId, amount, playerName }
-  const [respondedToRaise, setRespondedToRaise] = useState({})
   const [raisePlayer, setRaisePlayer] = useState(null)
 
+  // Track how much each player has put in THIS ROUND (for calculating difference when calling)
+  const [roundContributions, setRoundContributions] = useState({}) // { playerId: totalChipsPutInThisRound }
+  const [currentLevel, setCurrentLevel] = useState(0) // the highest total bet level this round
+  const [pendingFrom, setPendingFrom] = useState(null) // who raised to trigger pending
+
   const prePot = Object.values(bets).reduce((sum, b) => sum + b, 0)
-  const playersWithBets = players.filter(p => phase === 'betting' ? (bets[p.id] || 0) > 0 : true)
   const inHandPlayers = players.filter(p => p.gameState?.inHand && !folded[p.id])
+
+  // Who still needs to match currentLevel?
+  const playersNeedingAction = inHandPlayers.filter(p => {
+    const contrib = roundContributions[p.id] || 0
+    return contrib < currentLevel && (p.gameState?.chips || 0) > 0
+  })
+  const hasPendingRaise = currentLevel > 0 && playersNeedingAction.length > 0
 
   const addBet = (playerId, amount) => {
     const player = players.find(p => p.id === playerId)
@@ -46,8 +55,9 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
     setBets({})
     setFolded({})
     setRoundNum(1)
-    setPendingRaise(null)
-    setRespondedToRaise({})
+    setRoundContributions({})
+    setCurrentLevel(0)
+    setPendingFrom(null)
     setRaisePlayer(null)
     setPhase('round')
   }
@@ -55,62 +65,39 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
   const handleFold = (playerId) => {
     const newFolded = { ...folded, [playerId]: true }
     setFolded(newFolded)
-    if (pendingRaise) {
-      const newResponded = { ...respondedToRaise, [playerId]: true }
-      setRespondedToRaise(newResponded)
-      checkAllResponded(newFolded, newResponded)
-    }
     const remaining = players.filter(p => p.gameState?.inHand && !newFolded[p.id])
     if (remaining.length <= 1) {
-      setPendingRaise(null)
       setPhase('winner')
     }
   }
 
-  const handleRaise = (playerId, amount) => {
+  // Raise TO a new level (e.g. raise to 5 means total contribution = 5)
+  const handleRaiseTo = (playerId, newLevel) => {
     const player = players.find(p => p.id === playerId)
-    const actual = Math.min(amount, player?.gameState?.chips || 0)
+    const alreadyPut = roundContributions[playerId] || 0
+    const needToPut = newLevel - alreadyPut
+    const actual = Math.min(needToPut, player?.gameState?.chips || 0)
     if (actual <= 0) return
+
     onAction(null, null, () => placeRaise(players, playerId, actual))
     setPot(prev => prev + actual)
-    // Everyone else (active, not folded, has chips) must respond
-    setPendingRaise({ playerId, amount: actual, playerName: player.name })
-    setRespondedToRaise({ [playerId]: true })
+    setRoundContributions(prev => ({ ...prev, [playerId]: alreadyPut + actual }))
+    setCurrentLevel(newLevel)
+    setPendingFrom(playerId)
     setRaisePlayer(null)
   }
 
-  const handleCallRaise = (playerId) => {
-    if (!pendingRaise) return
+  // Call = match current level
+  const handleCall = (playerId) => {
     const player = players.find(p => p.id === playerId)
-    const actual = Math.min(pendingRaise.amount, player?.gameState?.chips || 0)
+    const alreadyPut = roundContributions[playerId] || 0
+    const needToPut = currentLevel - alreadyPut
+    const actual = Math.min(needToPut, player?.gameState?.chips || 0)
+    if (actual <= 0) return
+
     onAction(null, null, () => placeCall(players, playerId, actual))
     setPot(prev => prev + actual)
-    const newResponded = { ...respondedToRaise, [playerId]: true }
-    setRespondedToRaise(newResponded)
-    checkAllResponded(folded, newResponded)
-  }
-
-  // Re-raise: someone who already responded now raises more
-  const handleReRaise = (playerId, amount) => {
-    const player = players.find(p => p.id === playerId)
-    const actual = Math.min(amount, player?.gameState?.chips || 0)
-    if (actual <= 0) return
-    onAction(null, null, () => placeRaise(players, playerId, actual))
-    setPot(prev => prev + actual)
-    // Reset: everyone must respond again except re-raiser
-    setPendingRaise({ playerId, amount: actual, playerName: player.name })
-    setRespondedToRaise({ [playerId]: true })
-    setRaisePlayer(null)
-  }
-
-  const checkAllResponded = (currentFolded, currentResponded) => {
-    const needToRespond = players.filter(p =>
-      p.gameState?.inHand && !currentFolded[p.id] && !currentResponded[p.id] && (p.gameState?.chips || 0) > 0
-    )
-    if (needToRespond.length === 0) {
-      setPendingRaise(null)
-      setRespondedToRaise({})
-    }
+    setRoundContributions(prev => ({ ...prev, [playerId]: alreadyPut + actual }))
   }
 
   const handleBuyIn = (playerId) => {
@@ -120,8 +107,9 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
   const nextRound = () => {
     if (roundNum >= 3) setPhase('winner')
     else setRoundNum(prev => prev + 1)
-    setPendingRaise(null)
-    setRespondedToRaise({})
+    setRoundContributions({})
+    setCurrentLevel(0)
+    setPendingFrom(null)
     setRaisePlayer(null)
   }
 
@@ -135,13 +123,14 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
     setFolded({})
     setRoundNum(0)
     setPot(0)
-    setPendingRaise(null)
-    setRespondedToRaise({})
+    setRoundContributions({})
+    setCurrentLevel(0)
+    setPendingFrom(null)
     setRaisePlayer(null)
     setPhase('betting')
   }
 
-  const canNextRound = !pendingRaise
+  const canNextRound = !hasPendingRaise
 
   return (
     <div className="space-y-4">
@@ -159,9 +148,9 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
                 {ROUND_LABELS[roundNum]}
               </div>
             )}
-            {pendingRaise && phase === 'round' && (
+            {hasPendingRaise && phase === 'round' && (
               <div className="mt-1 px-3 py-1 bg-red-500/30 rounded-full text-red-300 text-[10px] font-bold animate-shake">
-                ⬆ {pendingRaise.playerName} tố +{pendingRaise.amount}!
+                ⬆ Mức: {currentLevel} · Chờ {playersNeedingAction.length} người
               </div>
             )}
           </div>
@@ -177,6 +166,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
           const isFolded = folded[player.id]
           const preBet = bets[player.id] || 0
           const inHand = player.gameState?.inHand
+          const roundContrib = roundContributions[player.id] || 0
 
           return (
             <div key={player.id} className="absolute -translate-x-1/2 -translate-y-1/2 transition-all duration-300"
@@ -198,8 +188,8 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
                   </div>
                 )}
                 {phase === 'betting' && preBet > 0 && <div className="text-[9px] text-yellow-300 font-bold">đặt: {preBet}</div>}
+                {phase === 'round' && roundContrib > 0 && !isFolded && <div className="text-[9px] text-orange-300 font-bold">vòng: +{roundContrib}</div>}
                 {isFolded && <div className="text-[9px] text-red-400 font-bold uppercase">Bỏ</div>}
-                {/* Buy-in: show in betting phase OR during round when 0 chips */}
                 {chips <= 0 && !isFolded && (
                   <button onClick={(e) => { e.stopPropagation(); handleBuyIn(player.id) }}
                     className="mt-1 px-2 py-0.5 rounded-lg text-[8px] font-bold bg-purple-500/30 text-purple-300 touch-bounce">
@@ -278,27 +268,32 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
       {phase === 'round' && (
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl animate-slide-up">
           <p className="text-center text-xs font-bold text-yellow-400 mb-1">{ROUND_LABELS[roundNum]}</p>
-          <p className="text-center text-[10px] text-white/40 mb-3">Còn {inHandPlayers.length} người · Pot: {pot}</p>
+          <p className="text-center text-[10px] text-white/40 mb-3">
+            Còn {inHandPlayers.length} người · Pot: {pot}
+            {currentLevel > 0 && <span className="text-orange-400"> · Mức: {currentLevel}</span>}
+          </p>
 
           <div className="space-y-2 mb-4">
             {players.filter(p => p.gameState?.inHand).map(p => {
               const isFolded = folded[p.id]
               const chips = p.gameState?.chips || 0
               const hasChips = chips > 0
-              const needsRespond = pendingRaise && !isFolded && !respondedToRaise[p.id] && p.id !== pendingRaise.playerId
-              const hasResponded = pendingRaise && respondedToRaise[p.id] && p.id !== pendingRaise.playerId
+              const myContrib = roundContributions[p.id] || 0
+              const needsMore = currentLevel - myContrib
+              const needsToAct = needsMore > 0 && !isFolded && hasChips
 
               return (
                 <div key={p.id} className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
                   isFolded ? 'bg-white/5 opacity-40'
                     : !hasChips ? 'bg-white/5 opacity-60'
-                    : needsRespond ? 'bg-orange-500/15 border border-orange-400/30 animate-shake'
+                    : needsToAct ? 'bg-orange-500/15 border border-orange-400/30 animate-shake'
                     : 'bg-white/10'}`}>
                   <div className="flex items-center gap-2 min-w-0">
                     <span className={`text-xs font-bold truncate ${isFolded ? 'text-white/30 line-through' : 'text-white/90'}`}>
                       {p.name}
                     </span>
                     <span className={`text-[10px] font-bold ${chips === 0 ? 'text-red-400' : 'text-yellow-400/70'}`}>🪙{chips}</span>
+                    {myContrib > 0 && !isFolded && <span className="text-[9px] text-orange-400">đã bỏ {myContrib}</span>}
                     {!hasChips && !isFolded && (
                       <button onClick={() => handleBuyIn(p.id)}
                         className="text-[9px] font-bold text-purple-400 bg-purple-500/20 px-1.5 py-0.5 rounded touch-bounce">
@@ -307,32 +302,25 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
                     )}
                   </div>
                   <div className="flex gap-1.5 shrink-0">
-                    {/* Needs to respond to raise */}
-                    {!isFolded && needsRespond && hasChips && (
-                      <button onClick={() => handleCallRaise(p.id)}
+                    {/* Needs to match current level */}
+                    {needsToAct && (
+                      <button onClick={() => handleCall(p.id)}
                         className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-blue-500/30 text-blue-300 hover:bg-blue-500/40 touch-bounce">
-                        👁 Theo {Math.min(pendingRaise.amount, chips)}
+                        👁 Theo +{Math.min(needsMore, chips)}
                       </button>
                     )}
-                    {/* Already responded - can re-raise */}
-                    {!isFolded && hasResponded && hasChips && !raisePlayer && (
-                      <button onClick={() => setRaisePlayer(p.id)}
-                        className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-orange-500/20 text-orange-400 touch-bounce">
-                        ⬆ Tố lại
-                      </button>
-                    )}
-                    {/* No pending raise - can raise */}
-                    {!isFolded && !pendingRaise && hasChips && !raisePlayer && (
+                    {/* Can raise (always allowed if has chips and not folded) */}
+                    {!isFolded && hasChips && !raisePlayer && (
                       <button onClick={() => setRaisePlayer(p.id)}
                         className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-orange-500/20 text-orange-400 touch-bounce">
                         ⬆ Tố
                       </button>
                     )}
-                    {/* No chips */}
-                    {!isFolded && needsRespond && !hasChips && (
+                    {/* No chips indicator */}
+                    {!isFolded && !hasChips && needsMore > 0 && (
                       <span className="text-[10px] text-red-400/60 font-bold">Hết chip</span>
                     )}
-                    {/* Fold button */}
+                    {/* Fold */}
                     {!isFolded && (
                       <button onClick={() => handleFold(p.id)}
                         className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-red-500/20 text-red-400 touch-bounce">
@@ -346,28 +334,32 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
             })}
           </div>
 
-          {/* Raise amount selector */}
-          {raisePlayer && (
-            <div className="mb-4 p-3 bg-orange-500/10 border border-orange-400/20 rounded-xl animate-fade-in">
-              <p className="text-[10px] text-orange-400 font-bold mb-2">
-                {players.find(p => p.id === raisePlayer)?.name} tố bao nhiêu? (còn {players.find(p => p.id === raisePlayer)?.gameState?.chips || 0} chip)
-              </p>
-              <div className="flex gap-1.5 flex-wrap">
-                {[1, 2, 3, 5].map(n => {
-                  const rp = players.find(p => p.id === raisePlayer)
-                  return (
-                    <button key={n} onClick={() => pendingRaise ? handleReRaise(raisePlayer, n) : handleRaise(raisePlayer, n)}
-                      disabled={(rp?.gameState?.chips || 0) < n}
-                      className="px-3 py-2 rounded-lg text-xs font-bold bg-orange-500/30 text-orange-300 hover:bg-orange-500/50 touch-bounce disabled:opacity-20">
-                      +{n}
+          {/* Raise selector */}
+          {raisePlayer && (() => {
+            const rp = players.find(p => p.id === raisePlayer)
+            const rpChips = rp?.gameState?.chips || 0
+            const rpContrib = roundContributions[raisePlayer] || 0
+            // Raise TO options: must be higher than currentLevel
+            const raiseOptions = [1, 2, 3, 5].map(n => currentLevel + n).filter(n => (n - rpContrib) <= rpChips && n > currentLevel)
+
+            return (
+              <div className="mb-4 p-3 bg-orange-500/10 border border-orange-400/20 rounded-xl animate-fade-in">
+                <p className="text-[10px] text-orange-400 font-bold mb-2">
+                  {rp?.name} tố lên bao nhiêu? (hiện tại: {currentLevel}, đã bỏ: {rpContrib}, còn: {rpChips} chip)
+                </p>
+                <div className="flex gap-1.5 flex-wrap">
+                  {raiseOptions.map(level => (
+                    <button key={level} onClick={() => handleRaiseTo(raisePlayer, level)}
+                      className="px-3 py-2 rounded-lg text-xs font-bold bg-orange-500/30 text-orange-300 hover:bg-orange-500/50 touch-bounce">
+                      Tố {level} (+{level - rpContrib})
                     </button>
-                  )
-                })}
-                <button onClick={() => setRaisePlayer(null)}
-                  className="px-3 py-2 rounded-lg text-xs font-bold bg-white/10 text-white/40 touch-bounce">Hủy</button>
+                  ))}
+                  <button onClick={() => setRaisePlayer(null)}
+                    className="px-3 py-2 rounded-lg text-xs font-bold bg-white/10 text-white/40 touch-bounce">Hủy</button>
+                </div>
               </div>
-            </div>
-          )}
+            )
+          })()}
 
           {/* Next round / showdown */}
           {!raisePlayer && (
@@ -386,7 +378,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
               )}
               {!canNextRound && (
                 <div className="flex-1 py-3 text-center text-orange-400 text-xs font-bold">
-                  ⏳ Chờ mọi người theo hoặc bỏ...
+                  ⏳ Chờ mọi người theo ({playersNeedingAction.length} người) hoặc bỏ...
                 </div>
               )}
             </div>
