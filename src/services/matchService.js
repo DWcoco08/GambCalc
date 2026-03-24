@@ -159,18 +159,18 @@ function removePendingSync(matchId) {
 // --- Public API ---
 
 export async function saveCompletedMatch(match, userId) {
-  // Always save locally
-  localSaveToHistory(match)
-
-  // If logged in, try to save to Supabase
   if (userId && supabase) {
+    // Logged in: save to Supabase only
     try {
       await saveMatchToSupabase(match, userId)
-      removePendingSync(match.id)
     } catch (err) {
-      console.warn('Failed to sync match to Supabase, queued for later:', err)
+      console.warn('Failed to sync match to Supabase, saving locally as backup:', err)
+      localSaveToHistory(match)
       addPendingSync(match.id)
     }
+  } else {
+    // Not logged in: save to localStorage
+    localSaveToHistory(match)
   }
 }
 
@@ -192,80 +192,68 @@ export async function loadMatchHistory(userId) {
 }
 
 export async function softDeleteMatchService(matchId, userId) {
-  localSoftDelete(matchId)
-
   if (userId && supabase) {
     try {
       await supabase.from('matches').update({
         deleted: true,
         deleted_at: new Date().toISOString(),
       }).eq('id', matchId).eq('user_id', userId)
-    } catch (err) {
-      console.warn('Failed to soft delete on Supabase:', err)
-    }
+    } catch {}
+  } else {
+    localSoftDelete(matchId)
   }
 }
 
 export async function restoreMatchService(matchId, userId) {
-  localRestore(matchId)
-
   if (userId && supabase) {
     try {
       await supabase.from('matches').update({
         deleted: false,
         deleted_at: null,
       }).eq('id', matchId).eq('user_id', userId)
-    } catch (err) {
-      console.warn('Failed to restore on Supabase:', err)
-    }
+    } catch {}
+  } else {
+    localRestore(matchId)
   }
 }
 
 export async function permanentDeleteMatchService(matchId, userId) {
-  localPermanentDelete(matchId)
-
   if (userId && supabase) {
     try {
       await supabase.from('matches').delete().eq('id', matchId).eq('user_id', userId)
-    } catch (err) {
-      console.warn('Failed to permanent delete on Supabase:', err)
-    }
+    } catch {}
+  } else {
+    localPermanentDelete(matchId)
   }
 }
 
 export async function clearHistoryService(userId) {
-  localClearHistory()
-
   if (userId && supabase) {
     try {
       await supabase.from('matches').update({
         deleted: true,
         deleted_at: new Date().toISOString(),
       }).eq('user_id', userId)
-    } catch (err) {
-      console.warn('Failed to clear history on Supabase:', err)
-    }
+    } catch {}
+  } else {
+    localClearHistory()
   }
 }
 
 export async function restoreAllService(userId) {
-  localRestoreAll()
-
   if (userId && supabase) {
     try {
       await supabase.from('matches').update({
         deleted: false,
         deleted_at: null,
       }).eq('user_id', userId).eq('deleted', true)
-    } catch (err) {
-      console.warn('Failed to restore all on Supabase:', err)
-    }
+    } catch {}
+  } else {
+    localRestoreAll()
   }
 }
 
 export async function permanentDeleteAllService(userId) {
-  localPermanentDeleteAll()
-
   if (userId && supabase) {
     try {
       const { data } = await supabase.from('matches').select('id').eq('user_id', userId).eq('deleted', true)
@@ -276,6 +264,8 @@ export async function permanentDeleteAllService(userId) {
     } catch (err) {
       console.warn('Failed to permanent delete all on Supabase:', err)
     }
+  } else {
+    localPermanentDeleteAll()
   }
 }
 
