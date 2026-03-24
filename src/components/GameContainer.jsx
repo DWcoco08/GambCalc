@@ -36,7 +36,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
   const statusBar = (
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700/80">
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-xl shadow-sm border border-white/30 dark:border-gray-700/40">
           <span className="text-lg">{game.icon}</span>
           <div>
             <div className="text-xs font-bold text-gray-900 dark:text-white leading-tight">{game.name}</div>
@@ -48,14 +48,14 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
       </div>
       <div className="flex gap-1.5">
         <button onClick={onUndo} disabled={!canUndo} title="Undo"
-          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/80 text-gray-500 dark:text-gray-400 shadow-sm disabled:opacity-20 disabled:shadow-none transition-all touch-bounce">
+          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-white/20 dark:border-gray-700/30 text-gray-500 dark:text-gray-400 shadow-sm disabled:opacity-20 disabled:shadow-none transition-all touch-bounce">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a5 5 0 0 1 0 10H9" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10l4-4m-4 4l4 4" />
           </svg>
         </button>
         <button onClick={onRedo} disabled={!canRedo} title="Redo"
-          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700/80 text-gray-500 dark:text-gray-400 shadow-sm disabled:opacity-20 disabled:shadow-none transition-all touch-bounce">
+          className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-white/20 dark:border-gray-700/30 text-gray-500 dark:text-gray-400 shadow-sm disabled:opacity-20 disabled:shadow-none transition-all touch-bounce">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10H11a5 5 0 0 0 0 10h4" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10l-4-4m4 4l-4 4" />
@@ -83,7 +83,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
   )
 
   const logPanel = (
-    <div className="bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/80 p-4 lg:p-5 shadow-sm flex flex-col lg:max-h-[80vh]">
+    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 lg:p-5 shadow-sm flex flex-col lg:max-h-[80vh]">
       <h3 className="text-xs lg:text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 shrink-0">
         Lịch sử lượt ({match.logs.length})
       </h3>
@@ -140,7 +140,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
       {/* Modals (shared) */}
       {showEndConfirm && (
         <div className="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-gray-100 dark:border-gray-700">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-white/30 dark:border-gray-700/40">
             <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto sm:hidden" />
             <div className="text-center">
               <span className="text-3xl">🏁</span>

@@ -35,7 +35,7 @@ export default function LoginPage() {
   return (
     <div className="fixed inset-0 flex items-center justify-center animate-fade-in z-10 px-4">
       <div className="w-full max-w-sm">
-        <div className="bg-white dark:bg-gray-800/90 rounded-3xl shadow-xl p-6 space-y-6 border border-gray-100 dark:border-gray-700/80">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-xl p-6 space-y-6 border border-white/30 dark:border-gray-700/40">
           {/* Header */}
           <div className="text-center">
             <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-purple-500/30 mb-3">

@@ -8,7 +8,7 @@ export default function SummaryModal({ summary, onClose }) {
 
   return (
     <div className="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center animate-fade-in">
-      <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md p-6 space-y-5 animate-slide-up border-t border-gray-100 dark:border-gray-700 max-h-[85vh] overflow-y-auto">
+      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md p-6 space-y-5 animate-slide-up border-t border-white/30 dark:border-gray-700/40 max-h-[85vh] overflow-y-auto">
         <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto sm:hidden" />
 
         {/* Trophy */}

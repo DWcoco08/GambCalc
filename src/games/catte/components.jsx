@@ -85,7 +85,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                       ? 'border-orange-400/50 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/20 shadow-lg'
                       : isOnIce
                         ? 'border-blue-300/50 dark:border-blue-800/50 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/20 shadow-lg'
-                        : 'border-gray-200 dark:border-gray-700/80 bg-white dark:bg-gray-800/90 shadow-sm hover:shadow-md'
+                        : 'border-white/30 dark:border-gray-700/40 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md shadow-sm hover:shadow-md'
                   }
                   ${disabled ? 'opacity-50' : ''}
                   ${player.animClass || ''}
@@ -193,7 +193,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
       {/* Action buttons */}
       {selectedPlayer && (
         <div className="animate-slide-up">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 p-4 shadow-xl">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl">
             <p className="text-center text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
               {selectedName} thắng kiểu nào?
             </p>
@@ -228,7 +228,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
       {/* Confirm reset streak modal */}
       {confirmReset && (
         <div className="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center animate-fade-in">
-          <div className="bg-white dark:bg-gray-800 rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-gray-100 dark:border-gray-700">
+          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-white/30 dark:border-gray-700/40">
             <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto sm:hidden" />
             <div className="text-center">
               <span className="text-3xl">⚠️</span>

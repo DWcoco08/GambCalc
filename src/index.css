@@ -235,24 +235,12 @@ body {
   animation: loseShake 0.6s ease-in-out;
 }
 
-/* Glass effect - no blur on mobile for performance */
+/* Glass effect */
 .glass {
-  background: rgba(255, 255, 255, 0.92);
-}
-.dark .glass {
-  background: rgba(17, 24, 39, 0.92);
-}
-@media (min-width: 1024px) {
-  .glass {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-  .dark .glass {
-    background: rgba(17, 24, 39, 0.75);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Modal backdrop - no blur on mobile */

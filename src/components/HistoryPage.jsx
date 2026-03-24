@@ -155,10 +155,10 @@ export default function HistoryPage() {
           {filtered.map(match => (
             <div
               key={match.id}
-              className={`bg-white dark:bg-gray-800/90 rounded-2xl border overflow-hidden transition-all shadow-sm ${
+              className={`bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl border overflow-hidden transition-all shadow-sm ${
                 match.deleted
                   ? 'border-gray-200 dark:border-gray-700 opacity-60'
-                  : 'border-gray-100 dark:border-gray-700/80'
+                  : 'border-white/20 dark:border-gray-700/30'
               }`}
             >
               <button
@@ -190,7 +190,7 @@ export default function HistoryPage() {
               </button>
 
               {expandedId === match.id && (
-                <div className="px-3.5 pb-3.5 space-y-2 animate-slide-in border-t border-gray-100 dark:border-gray-700/80 pt-3">
+                <div className="px-3.5 pb-3.5 space-y-2 animate-slide-in border-t border-white/20 dark:border-gray-700/30 pt-3">
                   {/* Ranking */}
                   <div className="space-y-1">
                     {match.ranking?.map((player, i) => (
@@ -221,7 +221,7 @@ export default function HistoryPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 pt-2 border-t border-gray-100 dark:border-gray-700/80">
+                  <div className="flex gap-2 pt-2 border-t border-white/20 dark:border-gray-700/30">
                     {match.deleted ? (
                       <>
                         <button onClick={() => handleRestore(match.id)} className="flex-1 py-2 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold touch-bounce">

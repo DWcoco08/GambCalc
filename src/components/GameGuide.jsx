@@ -14,8 +14,8 @@ export default function GameGuide({ guide }) {
   if (!guide) return null
 
   return (
-    <div className="bg-white dark:bg-gray-800/90 rounded-3xl shadow-xl border border-gray-100 dark:border-gray-700/80 overflow-hidden animate-fade-in">
-      <div className="p-5 lg:p-6 pb-3 lg:pb-4 border-b border-gray-100 dark:border-gray-700/80">
+    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/30 dark:border-gray-700/40 overflow-hidden animate-fade-in">
+      <div className="p-5 lg:p-6 pb-3 lg:pb-4 border-b border-white/20 dark:border-gray-700/30">
         <h3 className="text-base lg:text-lg font-extrabold text-gray-900 dark:text-white">
           {guide.title}
         </h3>

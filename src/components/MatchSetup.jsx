@@ -27,7 +27,7 @@ export default function MatchSetup({ gameId, onStart }) {
   }
 
   const setupForm = (
-    <div className="bg-white dark:bg-gray-800/90 rounded-3xl shadow-xl p-5 lg:p-8 space-y-5 lg:space-y-6 border border-gray-100 dark:border-gray-700/80 animate-scale-in">
+    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-xl p-5 lg:p-8 space-y-5 lg:space-y-6 border border-white/30 dark:border-gray-700/40 animate-scale-in">
       {/* Header */}
       <div className="text-center pt-2">
         <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-purple-500/30 mb-3">
@@ -121,7 +121,7 @@ export default function MatchSetup({ gameId, onStart }) {
           <div>
             <button
               onClick={() => setShowGuide(!showGuide)}
-              className="w-full py-3 bg-white dark:bg-gray-800/90 rounded-2xl border border-gray-100 dark:border-gray-700/80 text-sm font-semibold text-gray-500 dark:text-gray-400 touch-bounce flex items-center justify-center gap-2"
+              className="w-full py-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl border border-white/20 dark:border-gray-700/30 text-sm font-semibold text-gray-500 dark:text-gray-400 touch-bounce flex items-center justify-center gap-2"
             >
               📖 {showGuide ? 'Ẩn hướng dẫn' : 'Xem hướng dẫn chơi'}
               <span className={`transition-transform ${showGuide ? 'rotate-180' : ''}`}>▾</span>
