@@ -148,29 +148,59 @@ export const pokerGame = {
     title: 'Hướng dẫn Poker',
     sections: [
       {
-        heading: '🎯 Cách dùng',
+        heading: '🎯 Luật chơi',
         items: [
-          'Mỗi người khởi đầu với 50 chip',
-          'Đặt chip → chip trừ liền',
-          'Tố thêm → chip trừ liền, người khác phải theo hoặc bỏ',
+          'Mỗi người bắt đầu với 50 chip',
+          'Đặt chip vào pot → chip trừ liền',
+          'Trải qua 3 vòng cược, cuối cùng so bài',
           'Ai thắng lấy hết pot',
         ],
       },
       {
         heading: '🃏 Flow mỗi ván',
         items: [
-          'Đặt chip vào pot (trừ liền)',
-          'Vòng 1: Xem 3 lá → Tố/Bỏ',
-          'Vòng 2: Lá thứ 4 → Tố/Bỏ',
-          'Vòng 3: Lá thứ 5 → So bài',
-          'Chọn người thắng → gom pot',
+          '1. Đặt chip vào pot (mỗi người chọn số chip)',
+          '2. Vòng 1: Xem 3 lá → có thể Tố / Bỏ',
+          '3. Vòng 2: Lá thứ 4 → có thể Tố / Bỏ',
+          '4. Vòng 3: Lá thứ 5 → So bài',
+          '5. Chọn người thắng → pot gom về',
+        ],
+      },
+      {
+        heading: '⬆ Quy tắc Tố',
+        items: [
+          'Tố = đặt mức cược cho vòng (1-5 chip)',
+          'Mức tố tối đa: 5 chip',
+          'Khi bị tố: phải Theo (trả phần chênh lệch) hoặc Bỏ',
+          'Có thể tố lại cao hơn (nếu chưa đạt mức 5)',
+          'Chip trừ liền khi tố hoặc theo',
+        ],
+      },
+      {
+        heading: '📊 Ví dụ tố',
+        table: [
+          ['Hành động', 'Mức', 'Người khác'],
+          ['A tố 1', '1', 'Phải theo 1 hoặc bỏ'],
+          ['B theo 1', '1', '—'],
+          ['C tố lên 5', '5', 'A,B phải theo thêm 4 hoặc bỏ'],
+          ['A theo +4', '5', '—'],
+          ['B bỏ', '—', 'Mất chip đã bỏ'],
+        ],
+      },
+      {
+        heading: '👁 Theo / ❌ Bỏ',
+        badges: [
+          { icon: '👁 Theo', desc: 'Trả phần chênh lệch để ở lại ván', color: 'blue' },
+          { icon: '⬆ Tố', desc: 'Đặt mức mới (1-5), người khác phải theo hoặc bỏ', color: 'orange' },
+          { icon: '❌ Bỏ', desc: 'Bỏ ván, mất chip đã đặt', color: 'red' },
         ],
       },
       {
         heading: '💰 Mua thêm chip',
         items: [
-          'Hết chip → mua thêm 50 chip',
-          'Cuối game: chip còn lại - (50 + chip mua thêm) = lời/lỗ',
+          'Hết chip → bấm "+Mua 50" bất kỳ lúc nào',
+          'Có thể mua ngay giữa vòng cược để theo/tố tiếp',
+          'Cuối game: chip còn - (50 + chip mua thêm) = lời/lỗ',
         ],
       },
     ],
