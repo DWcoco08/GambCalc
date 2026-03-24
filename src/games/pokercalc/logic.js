@@ -57,18 +57,18 @@ export function collectAndAward(players, contributions, winnerId) {
 }
 
 // Buy more chips
-export function buyInChips(players, playerId) {
+export function buyInChips(players, playerId, amount = STARTING_CHIPS) {
   const updatedPlayers = players.map(p => {
     if (p.id !== playerId) return p
     return {
       ...p,
-      gameState: { ...p.gameState, chips: p.gameState.chips + STARTING_CHIPS, totalBuyIn: (p.gameState.totalBuyIn || 0) + STARTING_CHIPS },
+      gameState: { ...p.gameState, chips: p.gameState.chips + amount, totalBuyIn: (p.gameState.totalBuyIn || 0) + amount },
     }
   })
   return {
     players: updatedPlayers,
     changes: {},
-    details: { action: 'Buy-in', playerId, playerName: players.find(p => p.id === playerId)?.name, amount: STARTING_CHIPS },
+    details: { action: 'Buy-in', playerId, playerName: players.find(p => p.id === playerId)?.name, amount },
   }
 }
 

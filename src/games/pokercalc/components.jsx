@@ -40,8 +40,8 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
     resetAll()
   }
 
-  const handleBuyIn = (playerId) => {
-    doAction(() => buyInChips(players, playerId))
+  const handleBuyIn = (playerId, amt) => {
+    doAction(() => buyInChips(players, playerId, amt))
   }
 
   const resetAll = () => {
@@ -88,10 +88,14 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
               {/* Quick actions */}
               <div className="flex gap-1 mt-2 justify-center">
                 {chips <= 0 && (
-                  <button onClick={() => handleBuyIn(player.id)}
-                    className="px-2 py-1 rounded-lg text-[9px] font-bold bg-purple-500/30 text-purple-300 touch-bounce">
-                    +Mua 50
-                  </button>
+                  <div className="flex gap-1 flex-wrap justify-center">
+                    {[10, 20, 30, 50].map(n => (
+                      <button key={n} onClick={() => handleBuyIn(player.id, n)}
+                        className="px-1.5 py-1 rounded-lg text-[8px] font-bold bg-purple-500/30 text-purple-300 touch-bounce">
+                        +{n}
+                      </button>
+                    ))}
+                  </div>
                 )}
                 <button onClick={() => onViewPlayer?.(player.id)}
                   className="px-2 py-1 rounded-lg text-[9px] font-bold bg-white/10 text-white/40 touch-bounce">
