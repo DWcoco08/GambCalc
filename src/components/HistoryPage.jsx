@@ -77,16 +77,16 @@ export default function HistoryPage() {
   }
   const handleRestoreAll = async () => {
     if (confirm('Khôi phục tất cả ván đã xóa?')) {
+      setShowDeleted(false)
       await restoreAllService(user?.id)
       await refreshHistory()
-      setShowDeleted(false)
     }
   }
   const handlePermanentDeleteAll = async () => {
     if (confirm('Xóa vĩnh viễn tất cả trong thùng rác? Không thể hoàn tác!')) {
+      setShowDeleted(false)
       await permanentDeleteAllService(user?.id)
       await refreshHistory()
-      setShowDeleted(false)
     }
   }
   const handleUploadLocal = async () => {

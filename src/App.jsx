@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Routes, Route, Navigate, useParams, NavLink } from 'react-router-dom'
+import { useState, useCallback } from 'react'
+import { Routes, Route, Navigate, useParams, NavLink, useNavigate } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import GameContainer from './components/GameContainer'
 import HistoryPage from './components/HistoryPage'
@@ -14,7 +14,13 @@ export default function App() {
   useDarkMode()
   const { match, startMatch, executeAction, undo, redo, canUndo, canRedo, endMatch, resetStreak } = useMatch()
   const { user, profile, isLoggedIn, signOut, loading: authLoading } = useAuth()
+  const navigate = useNavigate()
   const games = getAllGames()
+
+  const handleSignOut = useCallback(async () => {
+    await signOut()
+    navigate('/game/catte', { replace: true })
+  }, [signOut, navigate])
 
   if (authLoading) {
     return (
@@ -40,7 +46,7 @@ export default function App() {
         user={user}
         profile={profile}
         isLoggedIn={isLoggedIn}
-        onSignOut={signOut}
+        onSignOut={handleSignOut}
       />
 
       {/* Desktop sidebar */}
@@ -101,7 +107,7 @@ export default function App() {
                 <div className="text-xs font-bold text-white truncate">
                   {profile?.display_name || user.email}
                 </div>
-                <button onClick={signOut} className="text-[10px] text-red-400 hover:text-red-500 font-semibold">
+                <button onClick={handleSignOut} className="text-[10px] text-red-400 hover:text-red-500 font-semibold">
                   Đăng xuất
                 </button>
               </div>

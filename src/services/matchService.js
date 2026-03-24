@@ -177,15 +177,14 @@ export async function saveCompletedMatch(match, userId) {
 export async function loadMatchHistory(userId) {
   if (userId && supabase) {
     try {
-      // Logged in: use Supabase as source of truth
       const cloudHistory = await Promise.race([
         loadHistoryFromSupabase(userId),
-        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 5000)),
       ])
       return cloudHistory || []
     } catch {
-      // Supabase failed: fallback to local
-      return localLoadHistory()
+      // Supabase failed: return empty, NOT localStorage (avoid mixing users)
+      return []
     }
   }
   // Not logged in: use localStorage only

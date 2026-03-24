@@ -60,13 +60,21 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, password) => {
     const data = await authSignIn(email, password)
+    const u = data?.user || null
+    setUser(u)
+    if (u) {
+      try {
+        const p = await getProfile(u.id)
+        setProfile(p)
+      } catch {}
+    }
     return data
   }
 
   const signOut = async () => {
-    try { await authSignOut() } catch {}
     setUser(null)
     setProfile(null)
+    try { await authSignOut() } catch {}
   }
 
   return (
