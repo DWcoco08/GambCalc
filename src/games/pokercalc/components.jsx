@@ -7,6 +7,8 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
 
   const totalPot = Object.values(potContribs).reduce((sum, c) => sum + c, 0)
   const potPlayers = players.filter(p => (potContribs[p.id] || 0) > 0)
+  const currentRound = (match?.round || 0) + 1 // next round number
+  const completedRounds = match?.round || 0
 
   const doAction = (fn) => onAction(null, null, fn)
 
@@ -19,44 +21,69 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
     setPotContribs(prev => ({ ...prev, [playerId]: current + actual }))
   }
 
-  const setExact = (playerId, value) => {
-    const player = players.find(p => p.id === playerId)
-    const max = player?.gameState?.chips || 0
-    const num = Math.min(Math.max(0, parseInt(value) || 0), max)
-    setPotContribs(prev => ({ ...prev, [playerId]: num }))
-  }
-
   const clearChip = (playerId) => {
     setPotContribs(prev => { const n = { ...prev }; delete n[playerId]; return n })
   }
 
   const handleAwardPot = (winnerId) => {
     doAction(() => collectAndAward(players, potContribs, winnerId))
-    resetAll()
+    resetPot()
   }
 
   const handleBuyIn = (playerId, amt) => {
     doAction(() => buyInChips(players, playerId, amt))
   }
 
-  const resetAll = () => {
+  const resetPot = () => {
     setPotContribs({})
     setPhase('collect')
   }
 
+  // Sort players by chips for ranking display
+  const ranked = [...players].sort((a, b) => (b.gameState?.chips || 0) - (a.gameState?.chips || 0))
+
   return (
     <div className="space-y-4">
-      {/* Player chips overview */}
+      {/* Round indicator */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">🪙</span>
+          <div>
+            <div className="text-sm font-extrabold text-white/90">Lượt {currentRound}</div>
+            <div className="text-[10px] text-white/40">{completedRounds} lượt đã chơi</div>
+          </div>
+        </div>
+        {totalPot > 0 && (
+          <div className="px-3 py-1.5 bg-yellow-500/20 border border-yellow-400/30 rounded-xl">
+            <span className="text-sm font-extrabold text-yellow-400">Hủ: {totalPot}</span>
+          </div>
+        )}
+      </div>
+
+      {/* Player chips */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {players.map(player => {
           const chips = player.gameState?.chips || 0
           const contrib = potContribs[player.id] || 0
+          const rank = ranked.findIndex(p => p.id === player.id)
 
           return (
             <div key={player.id}
               className={`relative p-4 rounded-2xl border-2 transition-all text-center
                 ${contrib > 0 ? 'border-yellow-400/50 bg-yellow-500/10 shadow-lg shadow-yellow-500/20' : 'border-white/15 bg-black/40 backdrop-blur-sm'}
                 ${player.animClass || ''}`}>
+              {/* Rank badge */}
+              {completedRounds > 0 && (
+                <div className={`absolute -top-2 -left-2 w-6 h-6 flex items-center justify-center rounded-full text-[10px] font-extrabold ${
+                  rank === 0 ? 'bg-yellow-400 text-black' :
+                  rank === 1 ? 'bg-gray-300 text-black' :
+                  rank === 2 ? 'bg-orange-400 text-black' :
+                  'bg-white/20 text-white/50'
+                }`}>
+                  {rank + 1}
+                </div>
+              )}
+
               <div className="text-xs font-bold text-white/90 truncate">{player.name}</div>
               <div className={`text-2xl font-extrabold mt-1 ${chips === 0 ? 'text-red-400' : 'text-yellow-400'}`}>
                 🪙 {chips}
@@ -66,14 +93,13 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
               )}
               {player.money !== 0 && (
                 <div className={`text-[10px] font-bold mt-0.5 ${player.money > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                  {player.money > 0 ? '+' : ''}{player.money}
+                  {player.money > 0 ? '+' : ''}{player.money} chip
                 </div>
               )}
               {(player.gameState?.totalBuyIn || 0) > 0 && (
                 <div className="text-[8px] text-purple-400/60 mt-0.5">mua thêm: +{player.gameState.totalBuyIn}</div>
               )}
 
-              {/* Buy-in when 0 chips */}
               {chips <= 0 && (
                 <div className="flex gap-1 flex-wrap justify-center mt-2">
                   {[10, 20, 30, 50].map(n => (
@@ -100,13 +126,10 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
         })}
       </div>
 
-      {/* Pot: collect phase */}
+      {/* Collect phase */}
       {phase === 'collect' && (
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl animate-fade-in space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider">🪙 Bỏ chip vào hủ</h3>
-            {totalPot > 0 && <span className="text-sm font-extrabold text-yellow-400">Hủ: {totalPot}</span>}
-          </div>
+          <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider">Lượt {currentRound} · Bỏ chip vào hủ</h3>
 
           <div className="space-y-3">
             {players.map(p => {
@@ -143,12 +166,12 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
           {totalPot > 0 && potPlayers.length >= 1 && (
             <button onClick={() => setPhase('winner')}
               className="w-full py-3 bg-gradient-to-r from-yellow-500 to-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-yellow-500/30 touch-bounce text-sm">
-              🏆 Gom hủ · {totalPot} chip → Chọn người thắng
+              🏆 Gom hủ {totalPot} chip → Chọn người thắng
             </button>
           )}
 
           {totalPot > 0 && (
-            <button onClick={resetAll} className="w-full py-2 text-white/30 text-xs font-medium touch-bounce">Reset hủ</button>
+            <button onClick={resetPot} className="w-full py-2 text-white/30 text-xs font-medium touch-bounce">Reset hủ</button>
           )}
         </div>
       )}
@@ -156,7 +179,7 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
       {/* Winner selection */}
       {phase === 'winner' && (
         <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl animate-slide-up space-y-3">
-          <p className="text-center text-xs font-bold text-yellow-400">🏆 Ai thắng hủ {totalPot} chip?</p>
+          <p className="text-center text-xs font-bold text-yellow-400">🏆 Lượt {currentRound} · Ai thắng hủ {totalPot} chip?</p>
           <div className="grid grid-cols-2 gap-2">
             {potPlayers.map(p => (
               <button key={p.id} onClick={() => handleAwardPot(p.id)}
