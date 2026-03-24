@@ -8,28 +8,45 @@ export async function signIn(email, password) {
 }
 
 export async function signOut() {
-  if (!supabase) return
+  // Always clear local auth state first
   try {
-    await supabase.auth.signOut()
-  } catch {
-    // Always succeed - clear local state even if Supabase fails
+    // Clear Supabase auth tokens from localStorage
+    const keys = Object.keys(localStorage)
+    keys.forEach(key => {
+      if (key.startsWith('sb-') && key.includes('-auth-token')) {
+        localStorage.removeItem(key)
+      }
+    })
+  } catch {}
+
+  // Then try Supabase signOut (non-blocking)
+  if (supabase) {
+    try { await supabase.auth.signOut() } catch {}
   }
 }
 
 export async function getSession() {
   if (!supabase) return null
-  const { data } = await supabase.auth.getSession()
-  return data.session
+  try {
+    const { data } = await supabase.auth.getSession()
+    return data.session
+  } catch {
+    return null
+  }
 }
 
 export async function getProfile(userId) {
   if (!supabase) return null
-  const { data } = await supabase
-    .from('profiles')
-    .select('display_name')
-    .eq('id', userId)
-    .single()
-  return data
+  try {
+    const { data } = await supabase
+      .from('profiles')
+      .select('display_name')
+      .eq('id', userId)
+      .single()
+    return data
+  } catch {
+    return null
+  }
 }
 
 export function onAuthStateChange(callback) {

@@ -175,20 +175,23 @@ export async function saveCompletedMatch(match, userId) {
 }
 
 export async function loadMatchHistory(userId) {
-  // Always include local history
+  // Always have local as fallback
   const localHistory = localLoadHistory()
 
   if (userId && supabase) {
     try {
-      const cloudHistory = await loadHistoryFromSupabase(userId)
+      // Race: Supabase vs 3s timeout
+      const cloudHistory = await Promise.race([
+        loadHistoryFromSupabase(userId),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
+      ])
       if (cloudHistory && cloudHistory.length > 0) {
-        // Merge: cloud + local (dedup by id, cloud wins)
         const cloudIds = new Set(cloudHistory.map(m => m.id))
         const localOnly = localHistory.filter(m => !cloudIds.has(m.id))
         return [...cloudHistory, ...localOnly]
       }
-    } catch (err) {
-      console.warn('Failed to load from Supabase, using localStorage:', err)
+    } catch {
+      // Supabase failed or timed out, use local
     }
   }
   return localHistory
