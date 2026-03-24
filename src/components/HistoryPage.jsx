@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { getAllGames } from '../games/registry'
 import {
   loadMatchHistory,
@@ -24,24 +24,27 @@ export default function HistoryPage() {
   const [syncing, setSyncing] = useState(false)
   const games = getAllGames()
 
-  const refreshHistory = async () => {
-    const data = await loadMatchHistory(user?.id)
-    setHistory(data)
-  }
+  const refreshHistory = useCallback(async () => {
+    try {
+      const data = await loadMatchHistory(user?.id)
+      setHistory(data || [])
+    } catch {
+      setHistory([])
+    }
+  }, [user?.id])
 
+  // Load on mount + when user changes
   useEffect(() => {
     setLoading(true)
-    loadMatchHistory(user?.id)
-      .then(data => {
-        setHistory(data || [])
-      })
-      .catch(() => {
-        setHistory([])
-      })
-      .finally(() => {
-        setLoading(false)
-      })
-  }, [user?.id])
+    refreshHistory().finally(() => setLoading(false))
+  }, [refreshHistory])
+
+  // Refresh when page becomes visible (tab switch, navigate back)
+  useEffect(() => {
+    const handleFocus = () => refreshHistory()
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [refreshHistory])
 
   const filtered = history.filter(m => {
     if (!showDeleted && m.deleted) return false
@@ -52,19 +55,39 @@ export default function HistoryPage() {
 
   const deletedCount = history.filter(m => m.deleted).length
 
-  const handleSoftDelete = async (matchId) => { await softDeleteMatchService(matchId, user?.id); refreshHistory() }
-  const handleRestore = async (matchId) => { await restoreMatchService(matchId, user?.id); refreshHistory() }
+  const handleSoftDelete = async (matchId) => {
+    await softDeleteMatchService(matchId, user?.id)
+    await refreshHistory()
+  }
+  const handleRestore = async (matchId) => {
+    await restoreMatchService(matchId, user?.id)
+    await refreshHistory()
+  }
   const handlePermanentDelete = async (matchId) => {
-    if (confirm('Xóa vĩnh viễn ván này?')) { await permanentDeleteMatchService(matchId, user?.id); refreshHistory() }
+    if (confirm('Xóa vĩnh viễn ván này?')) {
+      await permanentDeleteMatchService(matchId, user?.id)
+      await refreshHistory()
+    }
   }
   const handleClearAll = async () => {
-    if (confirm('Xóa tất cả? (khôi phục trong thùng rác)')) { await clearHistoryService(user?.id); refreshHistory() }
+    if (confirm('Xóa tất cả? (khôi phục trong thùng rác)')) {
+      await clearHistoryService(user?.id)
+      await refreshHistory()
+    }
   }
   const handleRestoreAll = async () => {
-    if (confirm('Khôi phục tất cả ván đã xóa?')) { await restoreAllService(user?.id); await refreshHistory(); setShowDeleted(false) }
+    if (confirm('Khôi phục tất cả ván đã xóa?')) {
+      await restoreAllService(user?.id)
+      await refreshHistory()
+      setShowDeleted(false)
+    }
   }
   const handlePermanentDeleteAll = async () => {
-    if (confirm('Xóa vĩnh viễn tất cả trong thùng rác? Không thể hoàn tác!')) { await permanentDeleteAllService(user?.id); await refreshHistory(); setShowDeleted(false) }
+    if (confirm('Xóa vĩnh viễn tất cả trong thùng rác? Không thể hoàn tác!')) {
+      await permanentDeleteAllService(user?.id)
+      await refreshHistory()
+      setShowDeleted(false)
+    }
   }
   const handleUploadLocal = async () => {
     setSyncing(true)
@@ -102,7 +125,7 @@ export default function HistoryPage() {
             )}
           </div>
         </div>
-        {/* Trash actions - full width row */}
+        {/* Trash actions */}
         {showDeleted && deletedCount > 0 && (
           <div className="grid grid-cols-2 gap-2">
             <button onClick={handleRestoreAll} className="py-2.5 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold touch-bounce">
@@ -115,7 +138,7 @@ export default function HistoryPage() {
         )}
       </div>
 
-      {/* Sync button for logged-in users with local data */}
+      {/* Sync button */}
       {isLoggedIn && !showDeleted && (
         <button
           onClick={handleUploadLocal}
@@ -151,7 +174,7 @@ export default function HistoryPage() {
       </div>
 
       {/* List */}
-      {filtered.length === 0 ? (
+      {!loading && filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-400 dark:text-gray-500">
           <span className="text-5xl block mb-3">{showDeleted ? '🗑️' : '🎴'}</span>
           <p className="text-sm font-medium">{showDeleted ? 'Thùng rác trống' : 'Chưa có ván nào'}</p>
@@ -179,7 +202,7 @@ export default function HistoryPage() {
                     {match.gameName}
                   </div>
                   <div className="text-[10px] text-gray-400 font-medium mt-0.5">
-                    {new Date(match.startedAt).toLocaleDateString('vi-VN')} · {match.round} lượt · {match.players.length} người
+                    {new Date(match.startedAt).toLocaleDateString('vi-VN')} · {match.round} ván · {match.players.length} người
                   </div>
                 </div>
                 <div className="text-right shrink-0">
@@ -250,6 +273,7 @@ export default function HistoryPage() {
         </div>
       )}
 
+      {/* Player detail modal */}
       {viewingPlayer && (
         <PlayerHistory
           player={viewingPlayer.player}

@@ -175,26 +175,21 @@ export async function saveCompletedMatch(match, userId) {
 }
 
 export async function loadMatchHistory(userId) {
-  // Always have local as fallback
-  const localHistory = localLoadHistory()
-
   if (userId && supabase) {
     try {
-      // Race: Supabase vs 3s timeout
+      // Logged in: use Supabase as source of truth
       const cloudHistory = await Promise.race([
         loadHistoryFromSupabase(userId),
         new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 3000)),
       ])
-      if (cloudHistory && cloudHistory.length > 0) {
-        const cloudIds = new Set(cloudHistory.map(m => m.id))
-        const localOnly = localHistory.filter(m => !cloudIds.has(m.id))
-        return [...cloudHistory, ...localOnly]
-      }
+      return cloudHistory || []
     } catch {
-      // Supabase failed or timed out, use local
+      // Supabase failed: fallback to local
+      return localLoadHistory()
     }
   }
-  return localHistory
+  // Not logged in: use localStorage only
+  return localLoadHistory()
 }
 
 export async function softDeleteMatchService(matchId, userId) {
