@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import useAuth from '../hooks/useAuth'
+
+const REMEMBER_KEY = 'gambcalc_remember_email'
 
 export default function LoginPage() {
   const { signIn, isLoggedIn } = useAuth()
@@ -8,10 +10,19 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Already logged in, redirect
+  // Load saved email
+  useEffect(() => {
+    const saved = localStorage.getItem(REMEMBER_KEY)
+    if (saved) {
+      setEmail(saved)
+      setRememberMe(true)
+    }
+  }, [])
+
   if (isLoggedIn) {
     navigate('/game/catte', { replace: true })
     return null
@@ -22,6 +33,12 @@ export default function LoginPage() {
     setError('')
     setLoading(true)
     try {
+      // Save or clear remembered email
+      if (rememberMe) {
+        localStorage.setItem(REMEMBER_KEY, email)
+      } else {
+        localStorage.removeItem(REMEMBER_KEY)
+      }
       await signIn(email, password)
       navigate('/game/catte', { replace: true })
     } catch (err) {
@@ -98,6 +115,17 @@ export default function LoginPage() {
                 </button>
               </div>
             </div>
+
+            {/* Remember me */}
+            <label className="flex items-center gap-2 cursor-pointer touch-bounce">
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={e => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-purple-500 focus:ring-purple-500 bg-gray-50 dark:bg-gray-700"
+              />
+              <span className="text-xs font-medium text-gray-400 dark:text-gray-500">Ghi nhớ đăng nhập</span>
+            </label>
 
             {error && (
               <div className="p-3 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 text-xs font-semibold animate-shake">
