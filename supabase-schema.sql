@@ -1,7 +1,33 @@
 -- =============================================
 -- GambCalc - Supabase Database Schema
 -- Chạy file này trong Supabase SQL Editor
+-- DROP + CREATE lại toàn bộ
 -- =============================================
+
+-- 0. Drop everything (order matters: child tables first)
+drop trigger if exists on_auth_user_created on auth.users;
+drop function if exists public.handle_new_user();
+
+drop policy if exists "Users can read own match logs" on public.match_logs;
+drop policy if exists "Users can insert own match logs" on public.match_logs;
+drop policy if exists "Users can delete own match logs" on public.match_logs;
+
+drop policy if exists "Users can read own match players" on public.match_players;
+drop policy if exists "Users can insert own match players" on public.match_players;
+drop policy if exists "Users can delete own match players" on public.match_players;
+
+drop policy if exists "Users can read own matches" on public.matches;
+drop policy if exists "Users can insert own matches" on public.matches;
+drop policy if exists "Users can update own matches" on public.matches;
+drop policy if exists "Users can delete own matches" on public.matches;
+
+drop policy if exists "Users can read own profile" on public.profiles;
+drop policy if exists "Users can update own profile" on public.profiles;
+
+drop table if exists public.match_logs cascade;
+drop table if exists public.match_players cascade;
+drop table if exists public.matches cascade;
+drop table if exists public.profiles cascade;
 
 -- 1. Profiles table
 create table public.profiles (
