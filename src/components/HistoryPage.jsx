@@ -197,7 +197,7 @@ export default function HistoryPage() {
                       <div
                         key={player.id}
                         className="flex items-center gap-2.5 text-sm py-1.5 px-2 rounded-xl touch-bounce hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer"
-                        onClick={() => setViewingPlayer({ player, logs: match.logs })}
+                        onClick={() => setViewingPlayer({ player, logs: match.logs, gameId: match.gameId })}
                       >
                         <span className={`w-6 h-6 flex items-center justify-center rounded-lg text-[10px] font-extrabold ${
                           i === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-white' :
@@ -248,6 +248,7 @@ export default function HistoryPage() {
         <PlayerHistory
           player={viewingPlayer.player}
           logs={viewingPlayer.logs}
+          gameId={viewingPlayer.gameId}
           onClose={() => setViewingPlayer(null)}
         />
       )}

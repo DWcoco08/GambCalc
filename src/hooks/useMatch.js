@@ -76,7 +76,7 @@ export default function useMatch() {
     setRedoStack([])
   }, [])
 
-  const executeAction = useCallback((playerId, actionId) => {
+  const executeAction = useCallback((playerId, actionId, customActionFn) => {
     if (!match || !match.active) return
 
     const game = getGame(match.gameId)
@@ -86,13 +86,22 @@ export default function useMatch() {
     setUndoStack(prev => [...prev, JSON.parse(JSON.stringify(match))])
     setRedoStack([])
 
-    const result = game.executeAction(match.players, playerId, actionId, match.baseBet)
-    const newRound = match.round + 1
+    // Custom action (e.g. Poker) or standard action (e.g. Cát Tê)
+    let result
+    if (customActionFn) {
+      result = customActionFn()
+    } else {
+      result = game.executeAction(match.players, playerId, actionId, match.baseBet)
+    }
+    if (!result || !result.players) return
+
+    const isNewHand = result.details?.action === 'Win' || result.details?.action === 'Ante'
+    const newRound = isNewHand && result.details?.action === 'Win' ? match.round + 1 : match.round
 
     const playersWithAnim = result.players.map(p => ({
       ...p,
-      lastChange: result.changes[p.id] || 0,
-      animClass: result.changes[p.id] > 0 ? 'animate-pulse-green' : result.changes[p.id] < 0 ? 'animate-pulse-red' : '',
+      lastChange: result.changes?.[p.id] || 0,
+      animClass: (result.changes?.[p.id] || 0) > 0 ? 'animate-pulse-green' : (result.changes?.[p.id] || 0) < 0 ? 'animate-pulse-red' : '',
     }))
 
     // Clear previous animation timer to avoid race condition
@@ -110,16 +119,17 @@ export default function useMatch() {
 
     const logEntry = {
       id: Date.now().toString(),
-      round: newRound,
+      round: newRound || match.round,
       ...result.details,
-      changes: result.changes,
+      changes: result.changes || {},
       timestamp: new Date().toISOString(),
     }
 
     setMatch(prev => ({
       ...prev,
       players: playersWithAnim,
-      round: newRound,
+      round: newRound || prev.round,
+      roundState: result.roundState !== undefined ? result.roundState : prev.roundState,
       logs: [...prev.logs, logEntry],
     }))
   }, [match])

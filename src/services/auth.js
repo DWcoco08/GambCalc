@@ -9,8 +9,11 @@ export async function signIn(email, password) {
 
 export async function signOut() {
   if (!supabase) return
-  const { error } = await supabase.auth.signOut()
-  if (error) throw error
+  try {
+    await supabase.auth.signOut()
+  } catch {
+    // Always succeed - clear local state even if Supabase fails
+  }
 }
 
 export async function getSession() {

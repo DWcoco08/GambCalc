@@ -1,10 +1,16 @@
 import { catteGame } from './catte/logic'
 import CatteBoard from './catte/components'
+import { pokerGame } from './poker/logic'
+import PokerBoard from './poker/components'
 
 const gameRegistry = {
   catte: {
     ...catteGame,
     BoardComponent: CatteBoard,
+  },
+  poker: {
+    ...pokerGame,
+    BoardComponent: PokerBoard,
   },
 }
 

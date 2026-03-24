@@ -37,25 +37,36 @@ export default function MatchSetup({ gameId, onStart }) {
         <p className="text-gray-400 dark:text-gray-500 text-xs mt-1 font-medium">Tạo ván mới</p>
       </div>
 
-      {/* Base bet */}
-      <div>
-        <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Mức cược</label>
-        <div className="grid grid-cols-4 gap-2">
-          {[1000, 2000, 5000, 10000].map(bet => (
-            <button
-              key={bet}
-              onClick={() => setBaseBet(bet)}
-              className={`py-2.5 rounded-xl text-sm font-bold transition-all touch-bounce ${
-                baseBet === bet
-                  ? 'bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 scale-105'
-                  : 'bg-gray-100 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400'
-              }`}
-            >
-              {(bet / 1000)}k
-            </button>
-          ))}
+      {/* Base bet - only for games that use it */}
+      {!game.hideBaseBet && (
+        <div>
+          <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Mức cược</label>
+          <div className="grid grid-cols-4 gap-2">
+            {[1000, 2000, 5000, 10000].map(bet => (
+              <button
+                key={bet}
+                onClick={() => setBaseBet(bet)}
+                className={`py-2.5 rounded-xl text-sm font-bold transition-all touch-bounce ${
+                  baseBet === bet
+                    ? 'bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 scale-105'
+                    : 'bg-gray-100 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400'
+                }`}
+              >
+                {(bet / 1000)}k
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+      {game.startingChips && (
+        <div className="flex items-center gap-3 px-4 py-3 bg-yellow-500/10 border border-yellow-500/20 rounded-xl">
+          <span className="text-xl">🪙</span>
+          <div>
+            <div className="text-sm font-bold text-yellow-400">Mỗi người {game.startingChips} chip</div>
+            <div className="text-[10px] text-white/40">Hết chip có thể mua thêm</div>
+          </div>
+        </div>
+      )}
 
       {/* Players */}
       <div>

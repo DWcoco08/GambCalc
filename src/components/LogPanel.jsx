@@ -1,18 +1,21 @@
 export default function LogPanel({ logs }) {
-  if (!logs || logs.length === 0) {
+  // Only show main results (Win/Win Pot/Instant Win), not intermediate actions (Bet/Raise/Call/Fold/Buy-in)
+  const mainLogs = logs.filter(log =>
+    log.action === 'Win' || log.action === 'Instant Win' || log.action === 'Win Pot'
+  )
+
+  if (!mainLogs || mainLogs.length === 0) {
     return (
       <div className="text-center py-6 text-gray-400 dark:text-gray-500 text-xs">
-        Chưa có lượt nào
+        Chưa có ván nào
       </div>
     )
   }
 
-  // Track lose streaks per player across logs
+  // Track lose streaks per player across main logs
   const loseStreaks = {}
-  logs.forEach(log => {
-    // Winner resets their lose streak
+  mainLogs.forEach(log => {
     if (log.winnerId) loseStreaks[log.winnerId] = 0
-    // All losers increment
     if (log.changes) {
       Object.entries(log.changes).forEach(([pid, change]) => {
         if (Number(pid) !== log.winnerId && change < 0) {
@@ -24,7 +27,7 @@ export default function LogPanel({ logs }) {
 
   return (
     <div className="space-y-1.5 max-h-64 lg:max-h-none overflow-y-auto">
-      {[...logs].reverse().map((log, i) => {
+      {[...mainLogs].reverse().map((log, i) => {
         const streak = log.streak || 0
         const isDemon = streak >= 5
         const isHot = streak >= 3
@@ -77,9 +80,13 @@ export default function LogPanel({ logs }) {
               </div>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className={`text-[10px] font-semibold ${
-                  log.action === 'Instant Win' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'
+                  log.action === 'Instant Win' ? 'text-yellow-600 dark:text-yellow-400'
+                    : log.action === 'Win Pot' ? 'text-yellow-500 dark:text-yellow-400'
+                    : 'text-green-600 dark:text-green-400'
                 }`}>
-                  {log.action === 'Instant Win' ? '⚡ Tới trắng' : '🏆 Thắng'}
+                  {log.action === 'Instant Win' ? '⚡ Tới trắng'
+                    : log.action === 'Win Pot' ? '🪙 Thắng pot'
+                    : '🏆 Thắng'}
                 </span>
               </div>
             </div>

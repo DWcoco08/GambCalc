@@ -1,0 +1,178 @@
+const DEFAULT_BASE_BET = 2000
+const STARTING_CHIPS = 50
+
+export function createPokerPlayerState() {
+  return {
+    chips: STARTING_CHIPS,
+    totalBuyIn: 0,
+  }
+}
+
+// Place initial bets - deduct chips immediately
+export function placeBets(players, bets) {
+  const changes = {}
+  const updatedPlayers = players.map(p => {
+    const bet = bets[p.id] || 0
+    if (bet <= 0) return p
+    changes[p.id] = -bet
+    return {
+      ...p,
+      money: p.money - bet,
+      gameState: { ...p.gameState, chips: p.gameState.chips - bet },
+    }
+  })
+  const totalPot = Object.values(bets).reduce((sum, b) => sum + b, 0)
+  return {
+    players: updatedPlayers,
+    changes,
+    details: { action: 'Bet', amount: totalPot, bets },
+  }
+}
+
+// Raise - deduct chips from raiser immediately
+export function placeRaise(players, playerId, amount) {
+  const player = players.find(p => p.id === playerId)
+  if (!player) return null
+  const actual = Math.min(amount, player.gameState.chips)
+  if (actual <= 0) return null
+
+  const changes = { [playerId]: -actual }
+  const updatedPlayers = players.map(p => {
+    if (p.id !== playerId) return p
+    return {
+      ...p,
+      money: p.money - actual,
+      gameState: { ...p.gameState, chips: p.gameState.chips - actual },
+    }
+  })
+  return {
+    players: updatedPlayers,
+    changes,
+    details: { action: 'Raise', playerId, playerName: player.name, amount: actual },
+  }
+}
+
+// Call raise - deduct chips from caller immediately
+export function placeCall(players, playerId, amount) {
+  const player = players.find(p => p.id === playerId)
+  if (!player) return null
+  const actual = Math.min(amount, player.gameState.chips)
+  if (actual <= 0) return null
+
+  const changes = { [playerId]: -actual }
+  const updatedPlayers = players.map(p => {
+    if (p.id !== playerId) return p
+    return {
+      ...p,
+      money: p.money - actual,
+      gameState: { ...p.gameState, chips: p.gameState.chips - actual },
+    }
+  })
+  return {
+    players: updatedPlayers,
+    changes,
+    details: { action: 'Call', playerId, playerName: player.name, amount: actual },
+  }
+}
+
+// Award pot to winner - only add chips, no deduction (already deducted)
+export function awardPot(players, winnerId, totalPot) {
+  const winner = players.find(p => p.id === winnerId)
+  if (!winner) return null
+
+  const changes = { [winnerId]: totalPot }
+  const updatedPlayers = players.map(p => {
+    if (p.id !== winnerId) return p
+    return {
+      ...p,
+      money: p.money + totalPot,
+      gameState: { ...p.gameState, chips: p.gameState.chips + totalPot },
+    }
+  })
+  return {
+    players: updatedPlayers,
+    changes,
+    details: {
+      winnerId,
+      winnerName: winner.name,
+      action: 'Win Pot',
+      amount: totalPot,
+    },
+  }
+}
+
+// Buy more chips
+export function buyInChips(players, playerId) {
+  const updatedPlayers = players.map(p => {
+    if (p.id !== playerId) return p
+    return {
+      ...p,
+      gameState: {
+        ...p.gameState,
+        chips: p.gameState.chips + STARTING_CHIPS,
+        totalBuyIn: (p.gameState.totalBuyIn || 0) + STARTING_CHIPS,
+      },
+    }
+  })
+  return {
+    players: updatedPlayers,
+    changes: {},
+    details: {
+      action: 'Buy-in',
+      playerId,
+      playerName: players.find(p => p.id === playerId)?.name,
+      amount: STARTING_CHIPS,
+    },
+  }
+}
+
+export const pokerGame = {
+  name: 'Poker',
+  icon: '🎰',
+  slug: 'poker',
+  defaultBaseBet: 0,
+  hideBaseBet: true,
+  minPlayers: 2,
+  maxPlayers: 8,
+  hasStreak: false,
+  startingChips: STARTING_CHIPS,
+  createPlayerState: createPokerPlayerState,
+  actions: [],
+  executeAction() { return null },
+  getPlayerStats(player) {
+    return [
+      { label: 'Chips', value: player.gameState?.chips || 0 },
+    ]
+  },
+  guide: {
+    title: 'Hướng dẫn Poker',
+    sections: [
+      {
+        heading: '🎯 Cách dùng',
+        items: [
+          'Mỗi người khởi đầu với 50 chip',
+          'Đặt chip → chip trừ liền',
+          'Tố thêm → chip trừ liền, người khác phải theo hoặc bỏ',
+          'Ai thắng lấy hết pot',
+        ],
+      },
+      {
+        heading: '🃏 Flow mỗi ván',
+        items: [
+          'Đặt chip vào pot (trừ liền)',
+          'Vòng 1: Xem 3 lá → Tố/Bỏ',
+          'Vòng 2: Lá thứ 4 → Tố/Bỏ',
+          'Vòng 3: Lá thứ 5 → So bài',
+          'Chọn người thắng → gom pot',
+        ],
+      },
+      {
+        heading: '💰 Mua thêm chip',
+        items: [
+          'Hết chip → mua thêm 50 chip',
+          'Cuối game: chip còn lại - (50 + chip mua thêm) = lời/lỗ',
+        ],
+      },
+    ],
+  },
+}

@@ -15,30 +15,47 @@ export function AuthProvider({ children }) {
       return
     }
 
-    // Get initial session
-    getSession().then(async (session) => {
-      const u = session?.user || null
-      setUser(u)
-      if (u) {
-        const p = await getProfile(u.id)
-        setProfile(p)
-      }
+    // Timeout: if Supabase doesn't respond in 3s, continue without auth
+    const timeout = setTimeout(() => {
       setLoading(false)
-    })
+    }, 3000)
+
+    // Get initial session
+    getSession()
+      .then(async (session) => {
+        const u = session?.user || null
+        setUser(u)
+        if (u) {
+          try {
+            const p = await getProfile(u.id)
+            setProfile(p)
+          } catch {}
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        clearTimeout(timeout)
+        setLoading(false)
+      })
 
     // Listen for auth changes
     const { data: { subscription } } = onAuthStateChange(async (_event, session) => {
       const u = session?.user || null
       setUser(u)
       if (u) {
-        const p = await getProfile(u.id)
-        setProfile(p)
+        try {
+          const p = await getProfile(u.id)
+          setProfile(p)
+        } catch {}
       } else {
         setProfile(null)
       }
     })
 
-    return () => subscription.unsubscribe()
+    return () => {
+      clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
   }, [])
 
   const signIn = async (email, password) => {
@@ -47,7 +64,7 @@ export function AuthProvider({ children }) {
   }
 
   const signOut = async () => {
-    await authSignOut()
+    try { await authSignOut() } catch {}
     setUser(null)
     setProfile(null)
   }
