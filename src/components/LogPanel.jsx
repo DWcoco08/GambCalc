@@ -1,7 +1,7 @@
 export default function LogPanel({ logs }) {
   // Only show main results (Win/Win Pot/Instant Win), not intermediate actions (Bet/Raise/Call/Fold/Buy-in)
   const mainLogs = logs.filter(log =>
-    log.action === 'Win' || log.action === 'Instant Win' || log.action === 'Win Pot'
+    log.action === 'Win' || log.action === 'Instant Win' || log.action === 'Win Pot' || log.action === 'Buy-in'
   )
 
   if (!mainLogs || mainLogs.length === 0) {
@@ -28,11 +28,28 @@ export default function LogPanel({ logs }) {
   return (
     <div className="space-y-1.5 max-h-64 lg:max-h-none overflow-y-auto">
       {[...mainLogs].reverse().map((log, i) => {
+        // Buy-in: simple gray row
+        if (log.action === 'Buy-in') {
+          return (
+            <div key={log.id} className={`flex items-center gap-2.5 p-2.5 rounded-xl text-sm bg-white/5 ${i === 0 ? 'animate-slide-in' : ''}`}>
+              <div className="w-7 h-7 flex items-center justify-center rounded-lg text-[10px] font-extrabold shrink-0 bg-gray-600/50 text-gray-400">
+                🛒
+              </div>
+              <div className="flex-1 min-w-0">
+                <span className="font-bold text-xs text-gray-400">{log.playerName}</span>
+                <div className="text-[10px] text-gray-500">Mua thêm {log.amount} chip</div>
+              </div>
+              <div className="text-[10px] text-gray-500 shrink-0">
+                {new Date(log.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+              </div>
+            </div>
+          )
+        }
+
         const streak = log.streak || 0
         const isDemon = streak >= 5
         const isHot = streak >= 3
 
-        // Row bg based on streak tier
         const rowBg = isDemon
           ? 'bg-gradient-to-r from-red-950/30 via-purple-950/20 to-red-950/30 dark:from-red-950/40 dark:via-purple-950/30 dark:to-red-950/40 border border-red-500/20'
           : isHot
@@ -41,7 +58,6 @@ export default function LogPanel({ logs }) {
           ? 'bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/10 dark:to-orange-900/10'
           : 'bg-gray-50 dark:bg-gray-800/50'
 
-        // Round badge color
         const roundBg = isDemon
           ? 'bg-gradient-to-br from-red-600 via-purple-600 to-red-600 text-white shadow-sm shadow-red-500/30'
           : isHot
@@ -50,7 +66,6 @@ export default function LogPanel({ logs }) {
           ? 'bg-gradient-to-br from-yellow-400 to-orange-500 text-white'
           : 'bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400'
 
-        // Streak badge
         const streakBadge = isDemon
           ? 'bg-gradient-to-r from-red-600 via-purple-600 to-red-600 text-white shadow-md shadow-red-500/40 animate-demon-badge'
           : isHot

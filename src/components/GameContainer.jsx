@@ -85,7 +85,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
   const logPanel = (
     <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 lg:p-5 shadow-sm flex flex-col lg:max-h-[80vh]">
       <h3 className="text-xs lg:text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 shrink-0">
-        Lịch sử lượt ({match.logs.filter(l => l.action === 'Win' || l.action === 'Instant Win' || l.action === 'Win Pot').length})
+        Lịch sử ({match.logs.filter(l => l.action === 'Win' || l.action === 'Instant Win' || l.action === 'Win Pot').length} ván)
       </h3>
       <div className="flex-1 min-h-0 overflow-y-auto">
         <LogPanel logs={match.logs} gameName={game.name} />

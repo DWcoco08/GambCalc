@@ -105,7 +105,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
 
   const checkRaiseResolved = (currentFolded, currentResponded) => {
     const needToRespond = players.filter(p =>
-      p.gameState?.inHand && !currentFolded[p.id] && !currentResponded[p.id]
+      p.gameState?.inHand && !currentFolded[p.id] && !currentResponded[p.id] && (p.gameState?.chips || 0) > 0
     )
     if (needToRespond.length === 0) {
       setPendingRaise(null)
@@ -149,7 +149,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
   return (
     <div className="space-y-4">
       {/* Poker table */}
-      <div className="relative w-full aspect-[4/3] lg:aspect-[5/3] max-w-2xl mx-auto">
+      <div className="relative w-full aspect-[4/3] lg:aspect-[5/3] max-w-2xl mx-auto mb-4">
         <div className="absolute inset-6 sm:inset-10 rounded-[50%] bg-gradient-to-br from-green-900/80 to-green-800/80 border-4 border-yellow-700/60 shadow-2xl shadow-green-900/50">
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className="text-3xl sm:text-4xl mb-1">🪙</div>
@@ -173,7 +173,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
         {/* Player seats */}
         {players.map((player, idx) => {
           const angle = (idx / players.length) * 2 * Math.PI - Math.PI / 2
-          const rx = 46, ry = 43
+          const rx = 44, ry = 40
           const x = 50 + rx * Math.cos(angle)
           const y = 50 + ry * Math.sin(angle)
           const chips = player.gameState?.chips || 0
@@ -280,26 +280,33 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
           <div className="space-y-2 mb-4">
             {players.filter(p => p.gameState?.inHand).map(p => {
               const isFolded = folded[p.id]
+              const chips = p.gameState?.chips || 0
+              const hasChips = chips > 0
               const needsRespond = pendingRaise && !isFolded && !respondedToRaise[p.id] && p.id !== pendingRaise.playerId
               return (
                 <div key={p.id} className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all ${
                   isFolded ? 'bg-white/5 opacity-40'
+                    : !hasChips ? 'bg-white/5 opacity-60'
                     : needsRespond ? 'bg-orange-500/15 border border-orange-400/30 animate-shake'
                     : 'bg-white/10'}`}>
                   <div className="flex items-center gap-2 min-w-0">
                     <span className={`text-xs font-bold truncate ${isFolded ? 'text-white/30 line-through' : 'text-white/90'}`}>
                       {p.name}
                     </span>
-                    <span className="text-[10px] text-yellow-400/70">🪙{p.gameState?.chips || 0}</span>
+                    <span className={`text-[10px] font-bold ${chips === 0 ? 'text-red-400' : 'text-yellow-400/70'}`}>🪙{chips}</span>
+                    {!hasChips && !isFolded && <span className="text-[9px] text-red-400/60">hết chip</span>}
                   </div>
                   <div className="flex gap-1.5 shrink-0">
-                    {!isFolded && needsRespond && (
+                    {!isFolded && needsRespond && hasChips && (
                       <button onClick={() => handleCallRaise(p.id)}
                         className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-blue-500/30 text-blue-300 hover:bg-blue-500/40 touch-bounce">
-                        👁 Theo {pendingRaise.amount}
+                        👁 Theo {Math.min(pendingRaise.amount, chips)}
                       </button>
                     )}
-                    {!isFolded && !needsRespond && !pendingRaise && !roundRaised && (
+                    {!isFolded && needsRespond && !hasChips && (
+                      <span className="text-[10px] text-red-400/60 font-bold">Hết chip</span>
+                    )}
+                    {!isFolded && !needsRespond && !pendingRaise && !roundRaised && hasChips && (
                       <button onClick={() => setRaisePlayer(raisePlayer === p.id ? null : p.id)}
                         className={`px-3 py-1.5 rounded-lg text-[10px] font-bold touch-bounce ${
                           raisePlayer === p.id ? 'bg-orange-500/40 text-orange-300' : 'bg-orange-500/20 text-orange-400'}`}>
