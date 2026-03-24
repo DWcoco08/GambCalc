@@ -31,10 +31,16 @@ export default function HistoryPage() {
 
   useEffect(() => {
     setLoading(true)
-    loadMatchHistory(user?.id).then(data => {
-      setHistory(data)
-      setLoading(false)
-    })
+    loadMatchHistory(user?.id)
+      .then(data => {
+        setHistory(data || [])
+      })
+      .catch(() => {
+        setHistory([])
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }, [user?.id])
 
   const filtered = history.filter(m => {

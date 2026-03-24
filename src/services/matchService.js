@@ -175,15 +175,23 @@ export async function saveCompletedMatch(match, userId) {
 }
 
 export async function loadMatchHistory(userId) {
+  // Always include local history
+  const localHistory = localLoadHistory()
+
   if (userId && supabase) {
     try {
-      const data = await loadHistoryFromSupabase(userId)
-      if (data) return data
+      const cloudHistory = await loadHistoryFromSupabase(userId)
+      if (cloudHistory && cloudHistory.length > 0) {
+        // Merge: cloud + local (dedup by id, cloud wins)
+        const cloudIds = new Set(cloudHistory.map(m => m.id))
+        const localOnly = localHistory.filter(m => !cloudIds.has(m.id))
+        return [...cloudHistory, ...localOnly]
+      }
     } catch (err) {
-      console.warn('Failed to load from Supabase, falling back to localStorage:', err)
+      console.warn('Failed to load from Supabase, using localStorage:', err)
     }
   }
-  return localLoadHistory()
+  return localHistory
 }
 
 export async function softDeleteMatchService(matchId, userId) {
