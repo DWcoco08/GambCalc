@@ -224,6 +224,29 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
             {totalPot > 0 && <span className="text-[10px] text-white/30">Hủ trước: {totalPot}</span>}
           </div>
 
+          {/* Quick pot - everyone same amount */}
+          {!isInHand && Object.keys(roundChips).length === 0 && (
+            <div>
+              <p className="text-[10px] text-white/40 mb-1.5">Tạo hủ nhanh (mỗi người bằng nhau)</p>
+              <div className="flex gap-1.5 flex-wrap">
+                {[1, 2, 3, 5, 10].map(n => {
+                  const canAfford = players.every(p => (p.gameState?.chips || 0) >= n)
+                  return (
+                    <button key={n} disabled={!canAfford}
+                      onClick={() => {
+                        const quick = {}
+                        players.forEach(p => { if ((p.gameState?.chips || 0) >= n) quick[p.id] = n })
+                        setRoundChips(quick)
+                      }}
+                      className="px-3 py-2 rounded-xl text-xs font-bold bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 touch-bounce disabled:opacity-20">
+                      Mỗi người {n}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="space-y-3">
             {players.map(p => {
               const chips = p.gameState?.chips || 0
