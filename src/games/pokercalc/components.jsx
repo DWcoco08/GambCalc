@@ -4,7 +4,6 @@ import { collectAndAward, buyInChips } from './logic'
 export default function PokerCalcBoard({ players, onAction, onViewPlayer, match }) {
   const [potContribs, setPotContribs] = useState({})
   const [phase, setPhase] = useState('collect') // 'collect' | 'winner'
-  const [customInput, setCustomInput] = useState({}) // { playerId: string }
 
   const totalPot = Object.values(potContribs).reduce((sum, c) => sum + c, 0)
   const potPlayers = players.filter(p => (potContribs[p.id] || 0) > 0)
@@ -29,7 +28,6 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
 
   const clearChip = (playerId) => {
     setPotContribs(prev => { const n = { ...prev }; delete n[playerId]; return n })
-    setCustomInput(prev => { const n = { ...prev }; delete n[playerId]; return n })
   }
 
   const handleAwardPot = (winnerId) => {
@@ -44,7 +42,6 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
   const resetAll = () => {
     setPotContribs({})
     setPhase('collect')
-    setCustomInput({})
   }
 
   return (
@@ -133,18 +130,6 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
                         +{n}
                       </button>
                     ))}
-                    <input
-                      type="number"
-                      min="0"
-                      max={chips}
-                      value={customInput[p.id] ?? (contrib || '')}
-                      onChange={e => {
-                        setCustomInput(prev => ({ ...prev, [p.id]: e.target.value }))
-                        setExact(p.id, e.target.value)
-                      }}
-                      className="w-14 px-2 py-1.5 rounded-lg text-[10px] font-bold bg-white/10 text-yellow-400 text-center border border-white/10 focus:border-yellow-400/50 focus:outline-none"
-                      placeholder="Nhập"
-                    />
                     {contrib > 0 && (
                       <button onClick={() => clearChip(p.id)}
                         className="px-2 py-1.5 rounded-lg text-[10px] font-bold bg-white/10 text-red-400 touch-bounce">✕</button>
