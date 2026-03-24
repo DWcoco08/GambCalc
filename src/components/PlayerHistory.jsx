@@ -15,7 +15,7 @@ const WIN_ACTIONS = ['Win', 'Instant Win', 'Win Pot']
 
 export default function PlayerHistory({ player, logs, gameId, onClose }) {
   const [expandedHand, setExpandedHand] = useState(null)
-  const isPoker = gameId === 'poker'
+  const isPoker = gameId === 'poker' || gameId === 'pokercalc'
 
   // Group logs by hand/round for Poker, or just list wins for Cát Tê
   let hands = []
