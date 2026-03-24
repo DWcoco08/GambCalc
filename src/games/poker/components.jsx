@@ -309,8 +309,8 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
                         👁 Theo +{Math.min(needsMore, chips)}
                       </button>
                     )}
-                    {/* Can raise (always allowed if has chips and not folded) */}
-                    {!isFolded && hasChips && !raisePlayer && (
+                    {/* Can raise (only if level < 5 max) */}
+                    {!isFolded && hasChips && !raisePlayer && currentLevel < 5 && (
                       <button onClick={() => setRaisePlayer(p.id)}
                         className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-orange-500/20 text-orange-400 touch-bounce">
                         ⬆ Tố
@@ -339,8 +339,8 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
             const rp = players.find(p => p.id === raisePlayer)
             const rpChips = rp?.gameState?.chips || 0
             const rpContrib = roundContributions[raisePlayer] || 0
-            // Raise TO options: must be higher than currentLevel
-            const raiseOptions = [1, 2, 3, 5].map(n => currentLevel + n).filter(n => (n - rpContrib) <= rpChips && n > currentLevel)
+            // Raise TO options: must be higher than currentLevel, max 5
+            const raiseOptions = [1, 2, 3, 4, 5].filter(n => n > currentLevel && (n - rpContrib) <= rpChips)
 
             return (
               <div className="mb-4 p-3 bg-orange-500/10 border border-orange-400/20 rounded-xl animate-fade-in">
