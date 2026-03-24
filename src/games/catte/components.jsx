@@ -42,7 +42,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
   return (
     <div className="space-y-4">
       {/* Player cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 overflow-visible">
         {players.map((player, idx) => {
           const isSelected = selectedPlayer === player.id
           const isWinning = player.money > 0
@@ -76,7 +76,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
               <button
                 disabled={disabled}
                 onClick={() => setSelectedPlayer(isSelected ? null : player.id)}
-                className={`relative w-full p-4 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce overflow-hidden
+                className={`relative w-full p-4 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce
                   ${isSelected
                     ? 'border-purple-500 bg-purple-500/10 dark:bg-purple-500/15 shadow-xl shadow-purple-500/25 scale-[1.03] z-10'
                     : isDemon

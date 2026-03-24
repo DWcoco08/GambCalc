@@ -100,7 +100,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
         <div className="mb-4">{statusBar}</div>
         <div className="grid grid-cols-5 gap-8 items-start">
           {/* Board - 3 cols */}
-          <div className="col-span-3 space-y-4">
+          <div className="col-span-3 space-y-4 overflow-visible">
             <BoardComponent
               players={match.players}
               onAction={onAction}
