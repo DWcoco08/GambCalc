@@ -21,17 +21,31 @@ export default function PlayerHistory({ player, logs, gameId, onClose }) {
   let hands = []
 
   if (isPoker) {
-    // Step 1: Group ALL logs into hands (split by "Win Pot")
+    // Step 1: Group ALL logs into hands (split by "Win Pot"), keep Buy-ins separate
     let allHands = []
     let currentHand = []
+    let handNum = 0
     logs.forEach(log => {
+      // Buy-in: standalone entry for this player
+      if (log.action === 'Buy-in' && log.playerId === player.id) {
+        hands.push({
+          num: null,
+          summary: `🛒 Mua thêm ${log.amount} chip`,
+          isWinner: false,
+          isBuyIn: true,
+          totalChange: 0,
+          details: null,
+        })
+        return
+      }
+
       currentHand.push(log)
       if (log.action === 'Win Pot') {
         allHands.push(currentHand)
         currentHand = []
       }
     })
-    if (currentHand.length > 0) allHands.push(currentHand) // unfinished
+    if (currentHand.length > 0) allHands.push(currentHand)
 
     // Step 2: For each hand, extract player's actions
     allHands.forEach((handLogs, idx) => {
@@ -40,17 +54,16 @@ export default function PlayerHistory({ player, logs, gameId, onClose }) {
         || (log.changes && log.changes[player.id] !== undefined)
         || log.playerId === player.id
       )
-      if (playerActions.length === 0) return // player not in this hand
+      if (playerActions.length === 0) return
 
+      handNum++
       const winLog = handLogs.find(l => l.action === 'Win Pot')
       const isFinished = !!winLog
       const isWinner = winLog?.winnerId === player.id
       const totalChange = playerActions.reduce((sum, l) => sum + (l.changes?.[player.id] || 0), 0)
-      // For winner: add pot amount (since chip was deducted earlier, pot is the gain)
-      const winnerPotGain = isWinner ? (winLog?.amount || 0) : 0
 
       hands.push({
-        num: idx + 1,
+        num: handNum,
         summary: !isFinished
           ? '⏳ Đang chơi'
           : isWinner
@@ -139,6 +152,20 @@ export default function PlayerHistory({ player, logs, gameId, onClose }) {
           ) : (
             <div className="space-y-2">
               {hands.map((hand, i) => {
+                // Buy-in: simple gray row
+                if (hand.isBuyIn) {
+                  return (
+                    <div key={i} className="rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                      <div className="flex items-center gap-3 px-3 py-3">
+                        <div className="w-8 h-8 flex items-center justify-center rounded-lg text-xs font-extrabold shrink-0 bg-gray-600/50 text-gray-400">
+                          🛒
+                        </div>
+                        <div className="text-sm font-medium text-gray-400">{hand.summary}</div>
+                      </div>
+                    </div>
+                  )
+                }
+
                 const isExpanded = expandedHand === i
                 const streak = hand.streak || 0
                 const isDemon = streak >= 5
