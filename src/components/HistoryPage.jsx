@@ -71,39 +71,42 @@ export default function HistoryPage() {
   return (
     <div className="space-y-4 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">
-          {showDeleted ? '🗑️ Thùng rác' : '📋 Lịch sử'}
-        </h2>
-        <div className="flex gap-1.5 flex-wrap">
-          {showDeleted && deletedCount > 0 && (
-            <>
-              <button onClick={handleRestoreAll} className="px-3 py-2 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold touch-bounce">
-                ↩ Khôi phục tất cả
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">
+            {showDeleted ? '🗑️ Thùng rác' : '📋 Lịch sử'}
+          </h2>
+          <div className="flex gap-1.5">
+            {deletedCount > 0 && (
+              <button
+                onClick={() => setShowDeleted(!showDeleted)}
+                className={`px-3 py-2 rounded-xl text-xs font-bold transition-all touch-bounce ${
+                  showDeleted
+                    ? 'bg-purple-500 text-white shadow-md shadow-purple-500/30'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                }`}
+              >
+                🗑️ {deletedCount}
               </button>
-              <button onClick={handlePermanentDeleteAll} className="px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 text-xs font-bold touch-bounce">
-                Xóa vĩnh viễn tất cả
+            )}
+            {!showDeleted && history.filter(m => !m.deleted).length > 0 && (
+              <button onClick={handleClearAll} className="px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 text-xs font-bold touch-bounce">
+                Xóa tất cả
               </button>
-            </>
-          )}
-          {deletedCount > 0 && (
-            <button
-              onClick={() => setShowDeleted(!showDeleted)}
-              className={`px-3 py-2 rounded-xl text-xs font-bold transition-all touch-bounce ${
-                showDeleted
-                  ? 'bg-purple-500 text-white shadow-md shadow-purple-500/30'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
-              }`}
-            >
-              🗑️ {deletedCount}
-            </button>
-          )}
-          {!showDeleted && history.filter(m => !m.deleted).length > 0 && (
-            <button onClick={handleClearAll} className="px-3 py-2 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 text-xs font-bold touch-bounce">
-              Xóa tất cả
-            </button>
-          )}
+            )}
+          </div>
         </div>
+        {/* Trash actions - full width row */}
+        {showDeleted && deletedCount > 0 && (
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={handleRestoreAll} className="py-2.5 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold touch-bounce">
+              ↩ Khôi phục tất cả
+            </button>
+            <button onClick={handlePermanentDeleteAll} className="py-2.5 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-500 text-xs font-bold touch-bounce">
+              Xóa vĩnh viễn tất cả
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Sync button for logged-in users with local data */}

@@ -1,6 +1,6 @@
 # GambCalc - Card Game Money Calculator
 
-Web app tinh tien cho cac game bai. Hien tai ho tro game **Cat Te**, thiet ke mo rong de them game khac trong tuong lai.
+A web app for calculating money in card games. Currently supports **Cat Te** (Vietnamese card game), designed to easily add more games in the future.
 
 ## Tech Stack
 
@@ -9,28 +9,28 @@ Web app tinh tien cho cac game bai. Hien tai ho tro game **Cat Te**, thiet ke mo
 - **Supabase** (Auth + PostgreSQL)
 - **localStorage** fallback (offline support)
 
-## Tinh nang
+## Features
 
-- Tinh tien tu dong: thang thuong, thang toi trang, chuoi thang (streak)
-- Undo / Redo khong gioi han, luu qua refresh
-- Lich su van dau voi soft delete + thung rac
-- Xem chi tiet +/- tung nguoi moi luot
-- Huy chuoi (chong gian lan) voi confirm
+- Auto money calculation: normal win, instant win, win streak multiplier
+- Unlimited Undo / Redo, persisted across refresh
+- Match history with soft delete + trash bin
+- Per-player round-by-round +/- detail view
+- Reset streak (anti-cheat) with confirmation
 - Dark mode
-- Dang nhap (khong co dang ky - admin tao tai khoan)
-- Dong bo lich su len Supabase khi dang nhap
-- Hoat dong offline bang localStorage
+- Login only (no registration - admin creates accounts)
+- Cloud sync to Supabase when logged in
+- Full offline support via localStorage
 
-## Hieu ung
+## Visual Effects
 
-- Win streak 2+: card phat sang cam
-- Win streak 5+: **DEMON MODE** - aura do tim bung no, badge lac lien tuc
-- Lose streak 5+: card phat sang xanh
-- Lose streak 10+: badge rung lac
-- Moc thua tien: -30k, -50k, -100k, -200k badges
-- Tat ca animation toi uu GPU (transform/opacity), mượt tren mobile
+- Win streak 2+: orange glow on player card
+- Win streak 5+: **DEMON MODE** - red-purple fire aura, shaking badge with brightness flash
+- Lose streak 5+: blue glow on player card
+- Lose streak 10+: shaking badge
+- Money loss milestones: -30k, -50k, -100k, -200k badges
+- All animations GPU-optimized (transform/opacity only), smooth on mobile
 
-## Cai dat
+## Getting Started
 
 ```bash
 npm install
@@ -39,7 +39,7 @@ npm run dev
 
 ## Environment Variables
 
-Tao file `.env.local`:
+Create `.env.local`:
 
 ```
 VITE_SUPABASE_URL=https://your-project.supabase.co
@@ -48,44 +48,51 @@ VITE_SUPABASE_ANON_KEY=your-anon-key
 
 ## Database Setup
 
-Chay file `supabase-schema.sql` trong Supabase SQL Editor.
-
-Sau do vao **Authentication > Settings** tat "Enable sign ups" (chi admin tao tai khoan).
+1. Run `supabase-schema.sql` in Supabase SQL Editor
+2. Go to **Authentication > Settings** and disable "Enable sign ups"
+3. Create user accounts manually via **Authentication > Users > Add user**
 
 ## Deploy (Vercel)
 
-1. Push len GitHub
-2. Import repo tren Vercel
-3. Them Environment Variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
+1. Push to GitHub
+2. Import repo on Vercel
+3. Add Environment Variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
 4. Deploy
 
-## Cau truc thu muc
+## Project Structure
 
 ```
 src/
-  lib/supabase.js           # Supabase client
+  lib/supabase.js           # Supabase client init
   services/
-    auth.js                 # Login/logout
-    matchService.js         # localStorage + Supabase sync
-  contexts/AuthContext.jsx  # Auth state
+    auth.js                 # Sign in / sign out
+    matchService.js         # localStorage + Supabase sync layer
+  contexts/AuthContext.jsx  # Auth state provider
   hooks/
     useAuth.js              # Auth hook
-    useMatch.js             # Game state, undo/redo
-    useDarkMode.js          # Dark mode
+    useMatch.js             # Game state, undo/redo, streak reset
+    useDarkMode.js          # Dark mode toggle
   games/
-    registry.js             # Game registry
+    registry.js             # Game registry (extensible)
     catte/
-      logic.js              # Cat Te rules & calculations
+      logic.js              # Cat Te rules & money calculation
       components.jsx        # Cat Te board UI
   components/
-    GameContainer.jsx       # Main game view
-    GameGuide.jsx           # Game rules guide
-    MatchSetup.jsx          # Create match
-    LogPanel.jsx            # Round history
-    PlayerHistory.jsx       # Per-player detail
-    SummaryModal.jsx        # End match summary
-    HistoryPage.jsx         # Match history
-    LoginPage.jsx           # Login
-    Sidebar.jsx             # Navigation
-  utils/storage.js          # localStorage layer
+    GameContainer.jsx       # Main game view (desktop: 2-col layout)
+    GameGuide.jsx           # Game rules & badge guide
+    MatchSetup.jsx          # Match creation form
+    LogPanel.jsx            # Round-by-round log with streak effects
+    PlayerHistory.jsx       # Per-player timeline modal
+    SummaryModal.jsx        # End-of-match ranking & stats
+    HistoryPage.jsx         # Match history with filters & trash
+    LoginPage.jsx           # Login form (no registration)
+    Sidebar.jsx             # Navigation sidebar
+  utils/storage.js          # localStorage abstraction
 ```
+
+## Adding a New Game
+
+1. Create `src/games/yourgame/logic.js` with game definition
+2. Create `src/games/yourgame/components.jsx` with board UI
+3. Register in `src/games/registry.js`
+4. Game automatically appears in navigation
