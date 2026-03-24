@@ -30,7 +30,7 @@ export default function App() {
   return (
     <div className="flex h-[100dvh] relative overflow-hidden">
       {/* Background image */}
-      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(/las-vegas-night-time-neon-lights-casinos.jpg)' }} />
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: 'url(/piqsels.com-id-fuzpe.jpg)' }} />
       <div className="absolute inset-0 bg-black/30" />
       <div className="relative flex w-full h-full">
       {/* Sidebar - mobile overlay */}
