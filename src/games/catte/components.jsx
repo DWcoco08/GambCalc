@@ -59,10 +59,16 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
           const moneyLossMilestone = !isDisabled ? getMoneyLossMilestone(player.money) : null
           const isOnIce = !isDisabled && loseStreak >= 5
 
+          // Card filter classes for extreme lose streaks
+          const cardFilter = !isDisabled && loseStreak >= 30 ? 'card-black'
+            : !isDisabled && loseStreak >= 25 ? 'card-dark'
+            : !isDisabled && loseStreak >= 20 ? 'card-freeze'
+            : ''
+
           return (
             <div
               key={player.id}
-              className="relative animate-slide-up"
+              className={`relative animate-slide-up ${cardFilter}`}
               style={{ animationDelay: `${idx * 50}ms` }}
             >
               {/* Win streak glow */}

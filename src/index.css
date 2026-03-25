@@ -243,6 +243,29 @@ body {
   animation: loseShake 0.6s ease-in-out;
 }
 
+/* Freeze effect (lose streak 20+) */
+.card-freeze {
+  filter: saturate(0.2) brightness(0.7) hue-rotate(200deg);
+}
+.card-freeze::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(59,130,246,0.1) 0%, rgba(255,255,255,0.05) 50%, rgba(59,130,246,0.1) 100%);
+  pointer-events: none;
+}
+
+/* Black mode (lose streak 30+) */
+.card-black {
+  filter: grayscale(0.8) brightness(0.5);
+}
+
+/* Dark mode (lose streak 25+) */
+.card-dark {
+  filter: grayscale(0.5) brightness(0.6);
+}
+
 /* Glass effect */
 .glass {
   background: rgba(0, 0, 0, 0.3);

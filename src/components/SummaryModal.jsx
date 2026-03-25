@@ -1,4 +1,19 @@
+import { useEffect, useRef } from 'react'
+import { animateSummaryEntry, animateCrown } from '../utils/effects'
+
 export default function SummaryModal({ summary, onClose }) {
+  const containerRef = useRef(null)
+  const crownRef = useRef(null)
+
+  useEffect(() => {
+    if (summary && containerRef.current) {
+      animateSummaryEntry(containerRef.current)
+    }
+    if (summary && crownRef.current) {
+      animateCrown(crownRef.current)
+    }
+  }, [summary])
+
   if (!summary) return null
 
   const { ranking, round, gameName, logs } = summary
@@ -8,13 +23,13 @@ export default function SummaryModal({ summary, onClose }) {
 
   return (
     <div className="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center animate-fade-in">
-      <div className="bg-gray-800/95 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md p-6 space-y-5 animate-slide-up border-t border-white/15 max-h-[85vh] overflow-y-auto">
+      <div ref={containerRef} className="bg-gray-800/95 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md p-6 space-y-5 border-t border-white/15 max-h-[85vh] overflow-y-auto">
         <div className="w-10 h-1 bg-gray-600 rounded-full mx-auto sm:hidden" />
 
         {/* Trophy */}
-        <div className="text-center">
-          <div className="relative inline-block">
-            <span className="text-6xl animate-bounce-in inline-block">🏆</span>
+        <div className="text-center" data-animate>
+          <div ref={crownRef} className="relative inline-block">
+            <span className="text-6xl inline-block">🏆</span>
             <div className="absolute -top-2 -right-2 animate-confetti">✨</div>
             <div className="absolute -top-1 -left-3 animate-confetti" style={{ animationDelay: '0.2s' }}>🎉</div>
           </div>
@@ -27,7 +42,7 @@ export default function SummaryModal({ summary, onClose }) {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-3 gap-2" data-animate>
           {[
             { value: round, label: 'Lượt', color: 'text-purple-500', bg: 'from-purple-50 to-purple-100/50 dark:from-purple-900/20 dark:to-purple-800/10' },
             { value: topWinner?.name, label: 'Top 1', color: 'text-green-500', bg: 'from-green-50 to-green-100/50 dark:from-green-900/20 dark:to-green-800/10', truncate: true },
@@ -43,7 +58,7 @@ export default function SummaryModal({ summary, onClose }) {
         </div>
 
         {/* Ranking */}
-        <div className="space-y-2">
+        <div className="space-y-2" data-animate>
           {ranking.map((player, i) => (
             <div
               key={player.id}

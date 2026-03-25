@@ -1,15 +1,40 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { getGame } from '../games/registry'
 import MatchSetup from './MatchSetup'
 import LogPanel from './LogPanel'
 import SummaryModal from './SummaryModal'
 import PlayerHistory from './PlayerHistory'
+import { useAnnouncements } from '../utils/announcements'
+import { matchEndCelebration } from '../utils/effects'
 
 export default function GameContainer({ gameId, match, onStartMatch, onAction, onUndo, onRedo, canUndo, canRedo, onEndMatch, onResetStreak, onToggleDisabled, onAddPlayer }) {
   const [summary, setSummary] = useState(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [viewingPlayer, setViewingPlayer] = useState(null)
-  const [showLog, setShowLog] = useState(true) // default open
+  const [showLog, setShowLog] = useState(true)
+  const { checkMilestones, ToastComponent } = useAnnouncements()
+  const prevPlayersRef = useRef(null)
+
+  // Wrap onAction to detect milestones (Catte only)
+  const handleActionWithEffects = useCallback((playerId, actionId, customFn) => {
+    if (match && gameId === 'catte') {
+      prevPlayersRef.current = JSON.parse(JSON.stringify(match.players))
+    }
+    onAction(playerId, actionId, customFn)
+    // Check milestones after a small delay (state needs to update)
+    if (gameId === 'catte') {
+      setTimeout(() => {
+        const prev = prevPlayersRef.current
+        if (prev && match) {
+          // Get latest players from DOM-stored match
+          const latest = JSON.parse(localStorage.getItem('gambcalc_current_match'))
+          if (latest?.players) {
+            checkMilestones(prev, latest.players)
+          }
+        }
+      }, 100)
+    }
+  }, [onAction, match, gameId, checkMilestones])
   const game = getGame(gameId)
 
   if (!game) {
@@ -29,7 +54,10 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
 
   const handleEndMatch = () => {
     const result = onEndMatch()
-    if (result) setSummary(result)
+    if (result) {
+      setSummary(result)
+      matchEndCelebration()
+    }
     setShowEndConfirm(false)
   }
 
@@ -93,7 +121,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
           <div className={`${showLog ? 'flex-1' : 'w-full'} space-y-4 overflow-visible min-w-0`}>
             <BoardComponent
               players={match.players}
-              onAction={onAction}
+              onAction={handleActionWithEffects}
               onViewPlayer={setViewingPlayer}
               onResetStreak={onResetStreak}
               onToggleDisabled={onToggleDisabled}
@@ -127,7 +155,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
 
         <BoardComponent
           players={match.players}
-          onAction={onAction}
+          onAction={handleActionWithEffects}
           onViewPlayer={setViewingPlayer}
           onResetStreak={onResetStreak}
           onToggleDisabled={onToggleDisabled}
@@ -181,6 +209,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
       )}
 
       <SummaryModal summary={summary} onClose={() => setSummary(null)} />
+      {ToastComponent}
     </>
   )
 }
