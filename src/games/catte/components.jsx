@@ -98,23 +98,33 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                 `}
               >
                 {/* Horizontal card layout */}
-                <div className="flex items-center gap-4 lg:gap-6">
-                  {/* Left: Name + Money */}
+                <div className="flex items-center gap-3 lg:gap-5">
+                  {/* Left: Name + Money + Badges */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
+                    {/* Name row: name + chi tiết + reset streak */}
+                    <div className="flex items-center gap-2 flex-wrap">
                       <div className={`font-bold truncate text-base lg:text-xl ${isDisabled ? 'text-gray-500' : 'text-white'}`}>
                         {player.name}
                       </div>
-                      {isDisabled && <span className="text-[10px] lg:text-xs text-gray-500 font-bold shrink-0">Nghỉ</span>}
+                      <span onClick={(e) => { e.stopPropagation(); onViewPlayer?.(player.id) }}
+                        className="inline-flex items-center px-2 py-0.5 bg-white/10 text-white/30 rounded-md text-[9px] lg:text-[11px] font-semibold touch-bounce hover:bg-purple-500/20 hover:text-purple-400 transition-colors">
+                        Chi tiết
+                      </span>
+                      {streak >= 2 && !isDisabled && (
+                        <span onClick={(e) => { e.stopPropagation(); setConfirmReset(player.id) }}
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-red-500/20 text-red-400 cursor-pointer touch-bounce">✕ Hủy chuỗi</span>
+                      )}
+                      {isDisabled && <span className="text-[10px] lg:text-xs text-gray-500 font-bold">· Nghỉ chơi</span>}
                     </div>
+                    {/* Money */}
                     <div className={`text-3xl lg:text-5xl font-extrabold tracking-tight ${
                       isDisabled ? 'text-gray-500' : isWinning ? 'text-green-500' : isLosing ? 'text-red-500' : 'text-gray-400'
                     }`}>
                       {player.money > 0 ? '+' : ''}{formatMoney(player.money)}
                     </div>
                     {/* Badges */}
-                    {!isDisabled && (
-                      <div className="flex items-center gap-1.5 lg:gap-2 mt-1.5 lg:mt-2 flex-wrap">
+                    {!isDisabled && (streak > 0 || loseMilestone || (loseStreak >= 3) || moneyLossMilestone) && (
+                      <div className="flex items-center gap-1.5 lg:gap-2 mt-1.5 flex-wrap">
                         {streak > 0 && (
                           <span className={`inline-flex items-center gap-0.5 px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg text-xs lg:text-sm font-bold ${
                             isDemon ? 'bg-gradient-to-r from-red-600 via-purple-600 to-red-600 text-white shadow-lg shadow-red-500/50 animate-demon-badge'
@@ -123,10 +133,6 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                           }`}>
                             {isDemon ? '👹' : '🔥'} {streak}
                           </span>
-                        )}
-                        {streak >= 2 && (
-                          <span onClick={(e) => { e.stopPropagation(); setConfirmReset(player.id) }}
-                            className="inline-flex items-center px-1.5 py-1 rounded-lg text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-400 cursor-pointer hover:bg-red-200 dark:hover:bg-red-900/50 touch-bounce">✕</span>
                         )}
                         {loseMilestone && (
                           <span className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-bold bg-gradient-to-r ${loseMilestone.color} ${loseMilestone.text} shadow-md ${loseMilestone.glow} ${loseStreak >= 10 ? 'animate-lose-shake' : ''}`}>
@@ -145,21 +151,20 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                     )}
                   </div>
 
-                  {/* Right: Actions */}
-                  <div className="flex flex-col items-end gap-1.5 shrink-0">
-                    <span onClick={(e) => { e.stopPropagation(); onViewPlayer?.(player.id) }}
-                      className="inline-flex items-center px-2.5 py-1.5 bg-white/10 text-white/40 rounded-lg text-[10px] lg:text-xs font-semibold touch-bounce hover:bg-purple-500/20 hover:text-purple-400 transition-colors">
-                      Chi tiết
-                    </span>
-                    {!disabled && (
-                      <span onClick={(e) => { e.stopPropagation(); setConfirmDisable(player.id) }}
-                        className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-[10px] lg:text-xs font-bold cursor-pointer touch-bounce transition-colors ${
-                          isDisabled ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-white/10 text-white/30 hover:bg-white/20 hover:text-white/60'
-                        }`}>
-                        {isDisabled ? '▶ Vào lại' : '⏸ Nghỉ'}
-                      </span>
-                    )}
-                  </div>
+                  {/* Right: Disable/Enable - full height clickable */}
+                  {!disabled && (
+                    <div
+                      onClick={(e) => { e.stopPropagation(); setConfirmDisable(player.id) }}
+                      className={`shrink-0 w-16 lg:w-20 self-stretch flex flex-col items-center justify-center rounded-xl cursor-pointer touch-bounce transition-colors ${
+                        isDisabled
+                          ? 'bg-green-500/15 text-green-400 hover:bg-green-500/25'
+                          : 'bg-white/5 text-white/25 hover:bg-white/10 hover:text-white/50'
+                      }`}
+                    >
+                      <span className="text-lg lg:text-xl">{isDisabled ? '▶' : '⏸'}</span>
+                      <span className="text-[8px] lg:text-[10px] font-bold mt-0.5">{isDisabled ? 'Vào lại' : 'Nghỉ'}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Money change badge */}
