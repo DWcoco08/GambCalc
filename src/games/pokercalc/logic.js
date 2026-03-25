@@ -89,29 +89,40 @@ export const pokerCalcGame = {
     return [{ label: 'Chips', value: player.gameState?.chips || 0 }]
   },
   guide: {
-    title: 'Poker Calc - Máy tính chip',
+    title: 'Poker Calc - Quản lý chip',
     sections: [
       {
         heading: '🎯 Cách dùng',
         items: [
           'Mỗi người bắt đầu với 50 chip',
           'Dùng để quản lý chip khi chơi poker thật',
-          'Chuyển chip giữa người chơi hoặc gom pot',
+          'Chip trừ liền khi bỏ vào hủ',
+        ],
+      },
+      {
+        heading: '🃏 Flow mỗi ván',
+        items: [
+          '1. Tạo hủ: mỗi người bỏ chip vào (hoặc tạo hủ nhanh)',
+          '2. Lượt 2 - Xem lá 4: thêm chip hoặc bỏ',
+          '3. Lượt 3 - Xem lá 5: thêm chip hoặc bỏ',
+          '4. Lượt 4 - Show: thêm chip hoặc bỏ',
+          '5. Chọn người thắng → gom hủ về',
         ],
       },
       {
         heading: '💰 Chức năng',
         badges: [
-          { icon: '🔄 Chuyển', desc: 'Chuyển chip từ người này sang người kia', color: 'blue' },
-          { icon: '🪙 Gom pot', desc: 'Thu chip nhiều người → chọn winner lấy hết', color: 'orange' },
-          { icon: '🛒 Mua thêm', desc: 'Mua thêm 50 chip khi hết', color: 'purple' },
+          { icon: '🪙 Tạo hủ', desc: 'Bỏ chip vào pot, chip trừ liền', color: 'orange' },
+          { icon: '⏭ Lượt tiếp', desc: 'Qua lượt kế, thêm chip hoặc không', color: 'blue' },
+          { icon: '❌ Bỏ', desc: 'Bỏ ván, mất chip đã đặt', color: 'red' },
+          { icon: '🛒 Mua thêm', desc: 'Mua thêm 10/20/30/50 chip khi hết', color: 'purple' },
         ],
       },
       {
-        heading: '📊 Cuối game',
+        heading: '📊 Cuối trận',
         items: [
+          'Bấm kết thúc → xem bảng xếp hạng',
           'Chip còn lại - (50 + chip mua thêm) = lời/lỗ',
-          'Kết thúc ván → xem bảng xếp hạng tổng kết',
         ],
       },
     ],

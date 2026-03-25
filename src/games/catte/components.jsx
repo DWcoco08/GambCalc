@@ -157,8 +157,8 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                       onClick={(e) => { e.stopPropagation(); setConfirmDisable(player.id) }}
                       className={`shrink-0 w-16 lg:w-20 min-h-[60px] lg:min-h-[72px] flex flex-col items-center justify-center rounded-xl cursor-pointer touch-bounce transition-colors ${
                         isDisabled
-                          ? 'bg-green-600/60 text-green-200 hover:bg-green-600/70 shadow-lg shadow-green-600/20'
-                          : 'bg-red-600/50 text-red-200 hover:bg-red-600/60 shadow-lg shadow-red-600/15'
+                          ? 'bg-green-600 text-white hover:bg-green-500 shadow-lg shadow-green-600/30'
+                          : 'bg-red-600 text-white hover:bg-red-500 shadow-lg shadow-red-600/30'
                       }`}
                     >
                       <span className="text-lg lg:text-2xl">{isDisabled ? '▶' : '⏸'}</span>
