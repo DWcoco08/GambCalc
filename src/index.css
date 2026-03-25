@@ -243,6 +243,39 @@ body {
   animation: loseShake 0.6s ease-in-out;
 }
 
+/* Card particles */
+@keyframes cardFire {
+  0% { opacity: 0; transform: translateY(0) scale(1); }
+  20% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-40px) scale(0.3); }
+}
+@keyframes cardRain {
+  0% { opacity: 0; transform: translateY(-10px); }
+  20% { opacity: 0.6; }
+  100% { opacity: 0; transform: translateY(80px); }
+}
+@keyframes cardSnow {
+  0% { opacity: 0; transform: translateY(-5px) rotate(0deg); }
+  30% { opacity: 0.7; }
+  100% { opacity: 0; transform: translateY(60px) translateX(10px) rotate(180deg); }
+}
+@keyframes cardSkull {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.25; transform: scale(1.1); }
+}
+.animate-card-fire {
+  animation: cardFire 1.2s ease-out infinite;
+}
+.animate-card-rain {
+  animation: cardRain 0.8s linear infinite;
+}
+.animate-card-snow {
+  animation: cardSnow 2.5s ease-in-out infinite;
+}
+.animate-card-skull {
+  animation: cardSkull 2s ease-in-out infinite;
+}
+
 /* Freeze effect (lose streak 20+) */
 .card-freeze {
   filter: saturate(0.2) brightness(0.7) hue-rotate(200deg);

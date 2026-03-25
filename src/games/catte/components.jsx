@@ -80,7 +80,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
               <button
                 disabled={disabled}
                 onClick={() => !isDisabled && setSelectedPlayer(isSelected ? null : player.id)}
-                className={`relative w-full p-4 lg:p-5 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce
+                className={`relative w-full p-4 lg:p-5 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce overflow-hidden
                   ${isDisabled
                     ? 'border-gray-700 bg-gray-900 opacity-50 cursor-default'
                     : isSelected
@@ -107,6 +107,57 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                   ${player.animClass || ''}
                 `}
               >
+                {/* Card particles based on streak */}
+                {isDemon && Array.from({ length: 6 }).map((_, i) => (
+                  <div key={`fire-${i}`} className="absolute animate-card-fire" style={{
+                    left: `${10 + i * 15}%`, bottom: 0,
+                    width: 6 + Math.random() * 4, height: 10 + Math.random() * 8,
+                    background: i % 2 === 0 ? '#9333ea' : '#dc2626',
+                    borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+                    filter: `blur(${1 + Math.random()}px)`,
+                    boxShadow: `0 0 8px ${i % 2 === 0 ? '#9333ea' : '#dc2626'}`,
+                    animationDelay: `${i * 0.2}s`,
+                  }} />
+                ))}
+                {isOnFire && !isDemon && Array.from({ length: 4 }).map((_, i) => (
+                  <div key={`fire-${i}`} className="absolute animate-card-fire" style={{
+                    left: `${15 + i * 20}%`, bottom: 0,
+                    width: 5 + Math.random() * 3, height: 8 + Math.random() * 6,
+                    background: i % 2 === 0 ? '#f97316' : '#ef4444',
+                    borderRadius: '50% 50% 50% 50% / 60% 60% 40% 40%',
+                    filter: 'blur(1px)',
+                    boxShadow: `0 0 6px ${i % 2 === 0 ? '#f97316' : '#ef4444'}`,
+                    animationDelay: `${i * 0.25}s`,
+                  }} />
+                ))}
+                {loseStreak >= 10 && loseStreak < 20 && !isDisabled && Array.from({ length: 5 }).map((_, i) => (
+                  <div key={`rain-${i}`} className="absolute animate-card-rain" style={{
+                    left: `${10 + i * 18}%`, top: 0,
+                    width: 1, height: 12 + Math.random() * 8,
+                    background: 'linear-gradient(transparent, rgba(100,150,255,0.5))',
+                    animationDelay: `${i * 0.3}s`,
+                  }} />
+                ))}
+                {loseStreak >= 20 && loseStreak < 25 && !isDisabled && Array.from({ length: 6 }).map((_, i) => (
+                  <div key={`snow-${i}`} className="absolute animate-card-snow" style={{
+                    left: `${5 + i * 16}%`, top: 0,
+                    width: 4 + Math.random() * 3, height: 4 + Math.random() * 3,
+                    background: 'rgba(200,220,255,0.7)',
+                    borderRadius: '50%',
+                    filter: 'blur(1px)',
+                    boxShadow: '0 0 4px rgba(100,150,255,0.4)',
+                    animationDelay: `${i * 0.4}s`,
+                  }} />
+                ))}
+                {loseStreak >= 25 && !isDisabled && Array.from({ length: 3 }).map((_, i) => (
+                  <div key={`skull-${i}`} className="absolute animate-card-skull" style={{
+                    left: `${20 + i * 25}%`, top: '20%',
+                    fontSize: 14 + Math.random() * 6,
+                    opacity: 0.15,
+                    animationDelay: `${i * 0.5}s`,
+                  }}>💀</div>
+                ))}
+
                 {/* Horizontal card layout */}
                 <div className="flex items-center gap-3 lg:gap-5">
                   {/* Left: Name + Money + Badges */}
@@ -134,7 +185,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                     </div>
                     {/* Badges */}
                     {!isDisabled && (streak > 0 || loseMilestone || (loseStreak >= 3) || moneyLossMilestone) && (
-                      <div className="flex items-center gap-1.5 lg:gap-2 mt-1.5 flex-wrap">
+                      <div className="flex items-center gap-1.5 lg:gap-2 mt-1.5 flex-wrap overflow-visible relative z-10">
                         {streak > 0 && (
                           <span className={`inline-flex items-center gap-0.5 px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg text-xs lg:text-sm font-bold ${
                             isDemon ? 'bg-gradient-to-r from-red-600 via-purple-600 to-red-600 text-white shadow-lg shadow-red-500/50 animate-demon-badge'
