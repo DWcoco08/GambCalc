@@ -1,6 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { animateToast, dismissToast, screenShake, screenFlash, screenDarken, fireEffect, rainEffect, lightningFlash, snowEffect, horrorEffect, shatterEffect } from './effects'
-import FireBorder from './fireBorder'
+import { animateToast, dismissToast, screenShake, screenFlash, fireEffect, fireBorderEffect, lightningEffect, rainEffect, freezeEffect, darkenEffect, brokenScreenEffect } from './effects'
 
 // ==================== WIN STREAK CONFIG ====================
 const WIN_CONFIG = {
@@ -9,7 +8,7 @@ const WIN_CONFIG = {
     subtitle: 'Bắt đầu nóng lên rồi!',
     color: 'from-orange-500 to-red-500',
     border: 'border-orange-400/50',
-    fireBorder: 'light', // light fire around toast
+    hasFire: 1,
     effect: () => fireEffect(1),
   },
   4: {
@@ -17,7 +16,7 @@ const WIN_CONFIG = {
     subtitle: 'Không ai cản được!',
     color: 'from-orange-600 to-red-600',
     border: 'border-red-400/50',
-    fireBorder: 'medium',
+    hasFire: 2,
     effect: () => { fireEffect(2); screenShake(0.5) },
   },
   5: {
@@ -25,12 +24,11 @@ const WIN_CONFIG = {
     subtitle: 'Quỷ dữ thức tỉnh! Tất cả hãy coi chừng!',
     color: 'from-red-600 via-purple-600 to-red-600',
     border: 'border-purple-400/50',
-    fireBorder: 'demon',
-    effect: () => { fireEffect(3); screenShake(2); screenFlash('rgba(147,51,234,0.4)') },
+    hasFire: 3,
+    effect: () => { fireEffect(3); lightningEffect(); screenShake(2) },
   },
 }
 
-// 6+ uses demon but with escalating text
 const DEMON_TEXTS = [
   'Không thể dừng lại! Quỷ vương giáng thế!',
   'Cả bàn run sợ trước sức mạnh này!',
@@ -43,38 +41,38 @@ const LOSE_CONFIG = {
   5: {
     icon: '😰', title: 'THUA CHUỖI 5!',
     subtitle: 'Bắt đầu lo lắng... may mắn ở đâu rồi?',
-    color: 'from-red-500 to-rose-600',
-    effect: () => screenShake(0.5),
+    color: 'from-gray-600 to-gray-700',
+    effect: () => {},
   },
   10: {
     icon: '😢', title: 'THUA CHUỖI 10!',
     subtitle: 'Xui xẻo quá! Nước mắt lưng tròng...',
-    color: 'from-red-600 to-red-800',
-    effect: () => { rainEffect(1); screenShake(1) },
+    color: 'from-blue-700 to-blue-900',
+    effect: () => rainEffect(1),
   },
   15: {
-    icon: '😭', title: 'THUA CHUỖI 15!',
-    subtitle: 'Trời ơi thảm quá! Mưa gió bão bùng!',
-    color: 'from-red-700 to-red-900',
-    effect: () => { rainEffect(2); lightningFlash(); setTimeout(lightningFlash, 800) },
+    icon: '😭', title: 'THUA CHUỖI 15! THẢM!',
+    subtitle: 'Trời ơi! Mưa gió bão bùng! Sấm sét đánh xuống!',
+    color: 'from-blue-800 to-gray-900',
+    effect: () => { rainEffect(2); setTimeout(lightningEffect, 500); setTimeout(lightningEffect, 1200) },
   },
   20: {
     icon: '🥶', title: 'ĐÓNG BĂNG!',
     subtitle: 'Lạnh cóng! Tay run không cầm nổi bài!',
-    color: 'from-blue-500 to-cyan-600',
-    effect: () => { snowEffect(); screenFlash('rgba(59,130,246,0.3)') },
+    color: 'from-cyan-600 to-blue-800',
+    effect: () => freezeEffect(),
   },
   25: {
     icon: '💀', title: 'ĐEN!',
     subtitle: 'Bóng tối bao trùm... liệu còn hy vọng?',
-    color: 'from-gray-700 to-gray-900',
-    effect: () => { horrorEffect(); screenShake(2) },
+    color: 'from-gray-800 to-gray-950',
+    effect: () => darkenEffect(),
   },
   30: {
     icon: '☠️', title: 'ĐEN TUYỆT ĐỐI!',
     subtitle: 'Tận thế! Mọi thứ sụp đổ tan tành!',
-    color: 'from-gray-900 to-black',
-    effect: () => { shatterEffect() },
+    color: 'from-gray-950 to-black',
+    effect: () => brokenScreenEffect(),
   },
 }
 
@@ -96,7 +94,7 @@ const MONEY_CONFIG = {
     icon: '🏚️', title: 'PHÁ SẢN!',
     subtitle: 'Nhà cửa xe cộ cũng không còn... Mai mốt đi bộ đi làm! Nghỉ chơi về đi!',
     color: 'from-gray-900 to-black',
-    effect: () => { shatterEffect(); screenDarken() },
+    effect: () => { brokenScreenEffect() },
   },
 }
 
@@ -107,6 +105,7 @@ export function useAnnouncements() {
   const [current, setCurrent] = useState(null)
   const toastRef = useRef(null)
   const timerRef = useRef(null)
+  const fireCleanupRef = useRef(null)
   const processingRef = useRef(false)
 
   const processQueue = useCallback(() => {
@@ -127,14 +126,26 @@ export function useAnnouncements() {
       processingRef.current = true
       animateToast(toastRef.current)
       if (current.effect) current.effect()
+
+      // Fire border around toast
+      if (current.hasFire && toastRef.current) {
+        const inner = toastRef.current.querySelector('[data-toast-inner]')
+        if (inner) {
+          fireCleanupRef.current = fireBorderEffect(inner, current.hasFire)
+        }
+      }
+
       timerRef.current = setTimeout(() => {
+        if (fireCleanupRef.current) { fireCleanupRef.current(); fireCleanupRef.current = null }
         dismissToast(toastRef.current, processQueue)
       }, 3000)
     }
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+      if (fireCleanupRef.current) { fireCleanupRef.current(); fireCleanupRef.current = null }
+    }
   }, [current, processQueue])
 
-  // When queue changes and nothing playing, start processing
   useEffect(() => {
     if (queue.length > 0 && !current && !processingRef.current) {
       processQueue()
@@ -146,10 +157,9 @@ export function useAnnouncements() {
   }, [])
 
   const checkMilestones = useCallback((playersBefore, playersAfter) => {
-    // Collect all players who hit same milestone → merge into 1 announcement
-    const winMilestones = {} // { level: [names] }
-    const loseMilestones = {} // { level: [names] }
-    const moneyMilestones = {} // { amount: [names] }
+    const winMilestones = {}
+    const loseMilestones = {}
+    const moneyMilestones = {}
 
     playersAfter.forEach(after => {
       const before = playersBefore.find(p => p.id === after.id)
@@ -162,14 +172,12 @@ export function useAnnouncements() {
       const moneyBefore = before.money || 0
       const moneyAfter = after.money || 0
 
-      // Win streak (3, 4, 5+)
       if (streakAfter > streakBefore && streakAfter >= 3) {
         const key = Math.min(streakAfter, 5)
         if (!winMilestones[key]) winMilestones[key] = []
         winMilestones[key].push({ name: after.name, streak: streakAfter })
       }
 
-      // Lose streak (5, 10, 15, 20, 25, 30)
       if (loseAfter > loseBefore) {
         for (const m of [30, 25, 20, 15, 10, 5]) {
           if (loseAfter >= m && loseBefore < m) {
@@ -180,7 +188,6 @@ export function useAnnouncements() {
         }
       }
 
-      // Money milestones
       if (moneyAfter < moneyBefore) {
         for (const m of [200000, 100000, 50000]) {
           if (Math.abs(moneyAfter) >= m && Math.abs(moneyBefore) < m) {
@@ -192,7 +199,6 @@ export function useAnnouncements() {
       }
     })
 
-    // Fire win announcements
     Object.entries(winMilestones).forEach(([level, players]) => {
       const lvl = parseInt(level)
       const config = lvl >= 5 ? WIN_CONFIG[5] : WIN_CONFIG[lvl]
@@ -207,14 +213,12 @@ export function useAnnouncements() {
       })
     })
 
-    // Fire lose announcements (merge same milestone)
     Object.entries(loseMilestones).forEach(([level, names]) => {
       const config = LOSE_CONFIG[parseInt(level)]
       if (!config) return
       announce({ ...config, names: names.join(', ') })
     })
 
-    // Fire money announcements
     Object.entries(moneyMilestones).forEach(([amount, names]) => {
       const config = MONEY_CONFIG[parseInt(amount)]
       if (!config) return
@@ -229,15 +233,10 @@ export function useAnnouncements() {
         className="relative"
         style={{ opacity: 0, transform: 'scale(0)' }}
       >
-        {/* Canvas fire border */}
-        {current.fireBorder && (
-          <FireBorder
-            intensity={current.fireBorder === 'demon' ? 2 : current.fireBorder === 'medium' ? 1.5 : 1}
-            type={current.fireBorder}
-          />
-        )}
-        {/* Toast content */}
-        <div className={`relative bg-gradient-to-r ${current.color} px-10 py-8 rounded-3xl shadow-2xl text-center max-w-lg w-full border-2 ${current.border || 'border-white/20'}`}>
+        <div
+          data-toast-inner
+          className={`relative bg-gradient-to-r ${current.color} px-10 py-8 rounded-3xl shadow-2xl text-center max-w-lg w-full border-2 ${current.border || 'border-white/20'}`}
+        >
           <div className="text-6xl mb-3">{current.icon}</div>
           <div className="text-white/80 font-bold text-base mb-1">{current.names}</div>
           <div className="text-white font-extrabold text-3xl tracking-tight">{current.title}</div>
