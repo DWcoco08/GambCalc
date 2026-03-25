@@ -182,6 +182,27 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                   <div className="absolute top-2 left-2 animate-ring-pulse w-3 h-3 rounded-full bg-purple-500" />
                 )}
               </button>
+              {/* Action buttons - right below selected player */}
+              {isSelected && (
+                <div className="mt-2 animate-slide-up">
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleAction('win')}
+                      className="py-3 lg:py-4 bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-green-500/30 touch-bounce flex items-center justify-center gap-2"
+                    >
+                      <span className="text-lg lg:text-xl">🏆</span>
+                      <span className="text-sm lg:text-base">Thắng</span>
+                    </button>
+                    <button
+                      onClick={() => handleAction('instant')}
+                      className="py-3 lg:py-4 bg-gradient-to-br from-yellow-400 to-orange-500 text-white font-bold rounded-xl shadow-lg shadow-yellow-500/30 touch-bounce flex items-center justify-center gap-2"
+                    >
+                      <span className="text-lg lg:text-xl">⚡</span>
+                      <span className="text-sm lg:text-base">Tới Trắng</span>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )
         })}
@@ -197,33 +218,6 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
           </button>
         )}
       </div>
-
-      {/* Action buttons */}
-      {selectedPlayer && (
-        <div className="animate-slide-up">
-          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl">
-            <p className="text-center text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
-              {selectedName} thắng kiểu nào?
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleAction('win')}
-                className="py-4 bg-gradient-to-br from-green-500 to-emerald-600 text-white font-bold rounded-2xl shadow-lg shadow-green-500/30 transition-all touch-bounce flex flex-col items-center gap-1"
-              >
-                <span className="text-2xl">🏆</span>
-                <span className="text-sm">Thắng</span>
-              </button>
-              <button
-                onClick={() => handleAction('instant')}
-                className="py-4 bg-gradient-to-br from-yellow-400 to-orange-500 text-white font-bold rounded-2xl shadow-lg shadow-yellow-500/30 transition-all touch-bounce flex flex-col items-center gap-1"
-              >
-                <span className="text-2xl">⚡</span>
-                <span className="text-sm">Tới Trắng</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {!selectedPlayer && !disabled && (
         <div className="text-center py-3">
