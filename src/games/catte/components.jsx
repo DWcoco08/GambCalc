@@ -155,14 +155,14 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                   {!disabled && (
                     <div
                       onClick={(e) => { e.stopPropagation(); setConfirmDisable(player.id) }}
-                      className={`shrink-0 w-16 lg:w-20 self-stretch flex flex-col items-center justify-center rounded-xl cursor-pointer touch-bounce transition-colors ${
+                      className={`shrink-0 w-16 lg:w-20 min-h-[60px] lg:min-h-[72px] flex flex-col items-center justify-center rounded-xl cursor-pointer touch-bounce transition-colors ${
                         isDisabled
-                          ? 'bg-green-500/15 text-green-400 hover:bg-green-500/25'
-                          : 'bg-red-500/20 text-red-400 hover:bg-red-500/30 hover:text-red-300'
+                          ? 'bg-green-500/30 text-green-400 hover:bg-green-500/40 shadow-md shadow-green-500/10'
+                          : 'bg-red-500/25 text-red-400 hover:bg-red-500/35 hover:text-red-300'
                       }`}
                     >
-                      <span className="text-lg lg:text-xl">{isDisabled ? '▶' : '⏸'}</span>
-                      <span className="text-[8px] lg:text-[10px] font-bold mt-0.5">{isDisabled ? 'Vào lại' : 'Nghỉ'}</span>
+                      <span className="text-lg lg:text-2xl">{isDisabled ? '▶' : '⏸'}</span>
+                      <span className="text-[8px] lg:text-[11px] font-bold mt-0.5">{isDisabled ? 'Vào lại' : 'Nghỉ'}</span>
                     </div>
                   )}
                 </div>
