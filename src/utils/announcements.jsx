@@ -78,21 +78,21 @@ const LOSE_CONFIG = {
 const MONEY_CONFIG = {
   50000: {
     icon: '🔻', title: 'THUA 50K!',
-    subtitle: 'Ví đang khóc thét!',
+    subtitle: 'Ví đang khóc thét! Bao năm tiết kiệm bay trong một đêm...',
     color: 'from-red-500 to-red-700',
-    effect: () => screenShake(1),
+    effect: () => { screenShake(1); rainEffect(1) },
   },
   100000: {
     icon: '💸', title: 'THUA 100K!',
-    subtitle: 'Tiền bay như lá mùa thu!',
+    subtitle: 'Tiền bay như lá mùa thu! Tháng này ăn mì gói rồi nè!',
     color: 'from-red-700 to-red-900',
-    effect: () => { screenShake(2); screenFlash('rgba(220,38,38,0.3)') },
+    effect: () => { screenShake(2); screenFlash('rgba(220,38,38,0.3)'); rainEffect(2) },
   },
   200000: {
     icon: '🏚️', title: 'PHÁ SẢN!',
-    subtitle: 'Nhà cửa cũng không còn... về đi thôi!',
+    subtitle: 'Nhà cửa xe cộ cũng không còn... Mai mốt đi bộ đi làm! Nghỉ chơi về đi!',
     color: 'from-gray-900 to-black',
-    effect: () => { screenDarken(); screenShake(3) },
+    effect: () => { shatterEffect(); screenDarken() },
   },
 }
 
@@ -103,10 +103,15 @@ export function useAnnouncements() {
   const [current, setCurrent] = useState(null)
   const toastRef = useRef(null)
   const timerRef = useRef(null)
+  const processingRef = useRef(false)
 
-  const showNext = useCallback(() => {
+  const processQueue = useCallback(() => {
     setQueue(prev => {
-      if (prev.length === 0) { setCurrent(null); return prev }
+      if (prev.length === 0) {
+        setCurrent(null)
+        processingRef.current = false
+        return prev
+      }
       const [next, ...rest] = prev
       setCurrent(next)
       return rest
@@ -115,21 +120,26 @@ export function useAnnouncements() {
 
   useEffect(() => {
     if (current && toastRef.current) {
+      processingRef.current = true
       animateToast(toastRef.current)
       if (current.effect) current.effect()
       timerRef.current = setTimeout(() => {
-        dismissToast(toastRef.current, showNext)
+        dismissToast(toastRef.current, processQueue)
       }, 3000)
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
-  }, [current, showNext])
+  }, [current, processQueue])
+
+  // When queue changes and nothing playing, start processing
+  useEffect(() => {
+    if (queue.length > 0 && !current && !processingRef.current) {
+      processQueue()
+    }
+  }, [queue, current, processQueue])
 
   const announce = useCallback((config) => {
-    setQueue(prev => {
-      if (prev.length === 0 && !current) { setCurrent(config); return prev }
-      return [...prev, config]
-    })
-  }, [current])
+    setQueue(prev => [...prev, config])
+  }, [])
 
   const checkMilestones = useCallback((playersBefore, playersAfter) => {
     // Collect all players who hit same milestone → merge into 1 announcement
