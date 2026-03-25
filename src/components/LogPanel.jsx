@@ -6,7 +6,7 @@ export default function LogPanel({ logs }) {
 
   if (!mainLogs || mainLogs.length === 0) {
     return (
-      <div className="text-center py-6 text-gray-400 dark:text-gray-500 text-xs">
+      <div className="text-center py-6 text-gray-500 text-xs">
         Chưa có ván nào
       </div>
     )
@@ -84,7 +84,7 @@ export default function LogPanel({ logs }) {
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1.5">
-                <span className={`font-bold text-xs truncate ${isDemon ? 'text-red-400' : 'text-gray-900 dark:text-white'}`}>
+                <span className={`font-bold text-xs truncate ${isDemon ? 'text-red-400' : 'text-white'}`}>
                   {log.winnerName}
                 </span>
                 {streak > 1 && streakBadge && (

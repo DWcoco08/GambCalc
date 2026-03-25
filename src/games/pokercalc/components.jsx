@@ -216,7 +216,7 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
 
       {/* Collect phase */}
       {phase === 'collect' && (
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl animate-fade-in space-y-4">
+        <div className="bg-gray-800/95 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl animate-fade-in space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider">
               {isInHand ? `Lượt ${roundNum + 1}/4 · ${ROUND_NAMES[roundNum]}` : `Ván ${handNum} · Tạo hủ`}
@@ -316,7 +316,7 @@ export default function PokerCalcBoard({ players, onAction, onViewPlayer, match 
 
       {/* Winner phase */}
       {phase === 'winner' && (
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl animate-slide-up space-y-3">
+        <div className="bg-gray-800/95 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl animate-slide-up space-y-3">
           <p className="text-center text-xs font-bold text-yellow-400">🏆 Ván {handNum} · Ai thắng hủ {displayPot} chip?</p>
           {activePlayers.length === 1 ? (
             <div className="text-center space-y-3">

@@ -114,16 +114,16 @@ export default function PlayerHistory({ player, logs, gameId, onClose }) {
 
   return (
     <div className="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center animate-fade-in">
-      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md max-h-[85vh] flex flex-col border-t border-white/30 dark:border-gray-700/40 animate-slide-up">
+      <div className="bg-gray-800/95 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md max-h-[85vh] flex flex-col border-t border-white/15 animate-slide-up">
         {/* Handle */}
         <div className="pt-3 pb-1 sm:hidden">
-          <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto" />
+          <div className="w-10 h-1 bg-gray-600 rounded-full mx-auto" />
         </div>
 
         {/* Header */}
         <div className="px-5 py-4 flex items-center justify-between border-b border-white/10 dark:border-gray-700/30">
           <div>
-            <h3 className="text-lg font-extrabold text-gray-900 dark:text-white">
+            <h3 className="text-lg font-extrabold text-white">
               {player.name}
             </h3>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -140,7 +140,7 @@ export default function PlayerHistory({ player, logs, gameId, onClose }) {
             </div>
           </div>
           <button onClick={onClose}
-            className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-400 touch-bounce">
+            className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-700 text-gray-400 touch-bounce">
             ✕
           </button>
         </div>

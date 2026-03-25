@@ -102,7 +102,7 @@ export default function HistoryPage() {
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-extrabold text-gray-900 dark:text-white">
+          <h2 className="text-lg font-extrabold text-white">
             {showDeleted ? '🗑️ Thùng rác' : '📋 Lịch sử'}
           </h2>
           <div className="flex gap-1.5">
@@ -112,7 +112,7 @@ export default function HistoryPage() {
                 className={`px-3 py-2 rounded-xl text-xs font-bold transition-all touch-bounce ${
                   showDeleted
                     ? 'bg-purple-500 text-white shadow-md shadow-purple-500/30'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
                 }`}
               >
                 🗑️ {deletedCount}
@@ -165,7 +165,7 @@ export default function HistoryPage() {
             className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all touch-bounce shrink-0 ${
               filterGame === g.id
                 ? 'bg-purple-500 text-white shadow-md shadow-purple-500/30'
-                : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'
+                : 'bg-gray-100 dark:bg-gray-800 text-gray-400'
             }`}
           >
             {g.icon} {g.name}
@@ -175,7 +175,7 @@ export default function HistoryPage() {
 
       {/* List */}
       {!loading && filtered.length === 0 ? (
-        <div className="text-center py-16 text-gray-400 dark:text-gray-500">
+        <div className="text-center py-16 text-gray-500">
           <span className="text-5xl block mb-3">{showDeleted ? '🗑️' : '🎴'}</span>
           <p className="text-sm font-medium">{showDeleted ? 'Thùng rác trống' : 'Chưa có ván nào'}</p>
         </div>
@@ -184,10 +184,10 @@ export default function HistoryPage() {
           {filtered.map(match => (
             <div
               key={match.id}
-              className={`bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl border overflow-hidden transition-all shadow-sm ${
+              className={`bg-gray-800/90 backdrop-blur-md rounded-2xl border overflow-hidden transition-all shadow-sm ${
                 match.deleted
                   ? 'border-gray-200 dark:border-gray-700 opacity-60'
-                  : 'border-white/20 dark:border-gray-700/30'
+                  : 'border-white/10'
               }`}
             >
               <button
@@ -198,7 +198,7 @@ export default function HistoryPage() {
                   {games.find(g => g.id === match.gameId)?.icon || '🎮'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-gray-900 dark:text-white text-sm">
+                  <div className="font-bold text-white text-sm">
                     {match.gameName}
                   </div>
                   <div className="text-[10px] text-gray-400 font-medium mt-0.5">
@@ -219,7 +219,7 @@ export default function HistoryPage() {
               </button>
 
               {expandedId === match.id && (
-                <div className="px-3.5 pb-3.5 space-y-2 animate-slide-in border-t border-white/20 dark:border-gray-700/30 pt-3">
+                <div className="px-3.5 pb-3.5 space-y-2 animate-slide-in border-t border-white/10 pt-3">
                   {/* Ranking */}
                   <div className="space-y-1">
                     {match.ranking?.map((player, i) => (
@@ -250,7 +250,7 @@ export default function HistoryPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-2 pt-2 border-t border-white/20 dark:border-gray-700/30">
+                  <div className="flex gap-2 pt-2 border-t border-white/10">
                     {match.deleted ? (
                       <>
                         <button onClick={() => handleRestore(match.id)} className="flex-1 py-2 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 text-xs font-bold touch-bounce">

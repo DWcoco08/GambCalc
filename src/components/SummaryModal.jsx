@@ -8,8 +8,8 @@ export default function SummaryModal({ summary, onClose }) {
 
   return (
     <div className="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center animate-fade-in">
-      <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md p-6 space-y-5 animate-slide-up border-t border-white/30 dark:border-gray-700/40 max-h-[85vh] overflow-y-auto">
-        <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto sm:hidden" />
+      <div className="bg-gray-800/95 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl w-full sm:max-w-md p-6 space-y-5 animate-slide-up border-t border-white/15 max-h-[85vh] overflow-y-auto">
+        <div className="w-10 h-1 bg-gray-600 rounded-full mx-auto sm:hidden" />
 
         {/* Trophy */}
         <div className="text-center">
@@ -18,10 +18,10 @@ export default function SummaryModal({ summary, onClose }) {
             <div className="absolute -top-2 -right-2 animate-confetti">✨</div>
             <div className="absolute -top-1 -left-3 animate-confetti" style={{ animationDelay: '0.2s' }}>🎉</div>
           </div>
-          <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white mt-3">
+          <h2 className="text-2xl font-extrabold text-white mt-3">
             Kết thúc ván!
           </h2>
-          <p className="text-gray-400 dark:text-gray-500 text-sm font-medium mt-1">
+          <p className="text-gray-500 text-sm font-medium mt-1">
             {gameName} · {round} lượt
           </p>
         </div>
@@ -37,7 +37,7 @@ export default function SummaryModal({ summary, onClose }) {
               <div className={`text-xl font-extrabold ${stat.color} ${stat.truncate ? 'truncate text-base' : ''}`}>
                 {stat.value}
               </div>
-              <div className="text-[10px] text-gray-400 dark:text-gray-500 font-semibold uppercase mt-0.5">{stat.label}</div>
+              <div className="text-[10px] text-gray-500 font-semibold uppercase mt-0.5">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -62,7 +62,7 @@ export default function SummaryModal({ summary, onClose }) {
               }`}>
                 {i === 0 ? '👑' : i + 1}
               </div>
-              <div className="flex-1 font-bold text-gray-900 dark:text-white text-sm">
+              <div className="flex-1 font-bold text-white text-sm">
                 {player.name}
               </div>
               <div className={`font-extrabold text-sm ${

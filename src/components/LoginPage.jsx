@@ -53,16 +53,16 @@ export default function LoginPage() {
   return (
     <div className="fixed inset-0 flex items-center justify-center animate-fade-in z-10 px-4">
       <div className="w-full max-w-sm">
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-xl p-6 space-y-6 border border-white/30 dark:border-gray-700/40">
+        <div className="bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-xl p-6 space-y-6 border border-white/15">
           {/* Header */}
           <div className="text-center">
             <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-purple-500/30 mb-3">
               🎴
             </div>
-            <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">
+            <h2 className="text-xl font-extrabold text-white">
               Đăng nhập
             </h2>
-            <p className="text-gray-400 dark:text-gray-500 text-xs mt-1 font-medium">
+            <p className="text-gray-500 text-xs mt-1 font-medium">
               GambCalc - Card Game Calculator
             </p>
           </div>
@@ -70,7 +70,7 @@ export default function LoginPage() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                 Email
               </label>
               <input
@@ -79,12 +79,12 @@ export default function LoginPage() {
                 onChange={e => setEmail(e.target.value)}
                 required
                 autoComplete="email"
-                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600/50 text-gray-900 dark:text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700/80 border border-gray-600/50 text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 placeholder="email@example.com"
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
                 Mật khẩu
               </label>
               <div className="relative">
@@ -94,7 +94,7 @@ export default function LoginPage() {
                   onChange={e => setPassword(e.target.value)}
                   required
                   autoComplete="current-password"
-                  className="w-full px-4 py-3 pr-12 rounded-xl bg-gray-50 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600/50 text-gray-900 dark:text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3 pr-12 rounded-xl bg-gray-50 dark:bg-gray-700/80 border border-gray-600/50 text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                   placeholder="••••••••"
                 />
                 <button
@@ -124,7 +124,7 @@ export default function LoginPage() {
                 onChange={e => setRememberMe(e.target.checked)}
                 className="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-purple-500 focus:ring-purple-500 bg-gray-50 dark:bg-gray-700"
               />
-              <span className="text-xs font-medium text-gray-400 dark:text-gray-500">Ghi nhớ đăng nhập</span>
+              <span className="text-xs font-medium text-gray-500">Ghi nhớ đăng nhập</span>
             </label>
 
             {error && (
@@ -142,7 +142,7 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="text-center text-[11px] text-gray-400 dark:text-gray-500">
+          <p className="text-center text-[11px] text-gray-500">
             Liên hệ admin để nhận tài khoản
           </p>
         </div>
@@ -150,7 +150,7 @@ export default function LoginPage() {
         {/* Skip login */}
         <button
           onClick={() => navigate('/game/catte', { replace: true })}
-          className="w-full mt-4 py-3 text-gray-400 dark:text-gray-500 text-sm font-medium touch-bounce hover:text-purple-500 transition-colors"
+          className="w-full mt-4 py-3 text-gray-500 text-sm font-medium touch-bounce hover:text-purple-500 transition-colors"
         >
           Dùng không cần đăng nhập →
         </button>

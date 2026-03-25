@@ -82,7 +82,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                 onClick={() => !isDisabled && setSelectedPlayer(isSelected ? null : player.id)}
                 className={`relative w-full p-4 lg:p-5 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce
                   ${isDisabled
-                    ? 'border-gray-600/30 bg-black/40 opacity-40 cursor-default'
+                    ? 'border-gray-600/30 bg-gray-900/80 opacity-50 cursor-default'
                     : isSelected
                     ? 'border-purple-500 bg-purple-500/10 dark:bg-purple-500/15 shadow-xl shadow-purple-500/25 scale-[1.03] z-10'
                     : isDemon
@@ -91,7 +91,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                       ? 'border-orange-400/50 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/20 shadow-lg'
                       : isOnIce
                         ? 'border-blue-300/50 dark:border-blue-800/50 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/20 shadow-lg'
-                        : 'border-white/30 dark:border-gray-700/40 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md shadow-sm hover:shadow-md'
+                        : 'border-white/20 dark:border-gray-600/40 bg-gray-800/90 backdrop-blur-md shadow-sm hover:shadow-md'
                   }
                   ${disabled ? 'opacity-50' : ''}
                   ${player.animClass || ''}
@@ -221,7 +221,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
 
       {!selectedPlayer && !disabled && (
         <div className="text-center py-3">
-          <p className="text-gray-400 dark:text-gray-500 text-sm">
+          <p className="text-gray-500 text-sm">
             👆 Chọn người thắng
           </p>
         </div>
@@ -230,19 +230,19 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
       {/* Confirm reset streak modal */}
       {confirmReset && (
         <div className="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center animate-fade-in">
-          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-white/30 dark:border-gray-700/40">
-            <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto sm:hidden" />
+          <div className="bg-gray-800/95 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-white/15">
+            <div className="w-10 h-1 bg-gray-600 rounded-full mx-auto sm:hidden" />
             <div className="text-center">
               <span className="text-3xl">⚠️</span>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-2">Hủy chuỗi?</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Reset chuỗi thắng của <strong className="text-gray-900 dark:text-white">{players.find(p => p.id === confirmReset)?.name}</strong> về 1 vì gian lận
+              <h3 className="text-lg font-bold text-white mt-2">Hủy chuỗi?</h3>
+              <p className="text-sm text-gray-400 mt-1">
+                Reset chuỗi thắng của <strong className="text-white">{players.find(p => p.id === confirmReset)?.name}</strong> về 1 vì gian lận
               </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <button
                 onClick={() => setConfirmReset(null)}
-                className="py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold transition-colors touch-bounce"
+                className="py-3 rounded-2xl bg-gray-700 text-gray-300 font-semibold transition-colors touch-bounce"
               >
                 Hủy
               </button>
@@ -266,21 +266,21 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
         const isCurrentlyDisabled = p?.gameState?.disabled
         return (
           <div className="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center animate-fade-in">
-            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-white/30 dark:border-gray-700/40">
-              <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto sm:hidden" />
+            <div className="bg-gray-800/95 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-white/15">
+              <div className="w-10 h-1 bg-gray-600 rounded-full mx-auto sm:hidden" />
               <div className="text-center">
                 <span className="text-3xl">{isCurrentlyDisabled ? '▶️' : '⏸️'}</span>
-                <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-2">
+                <h3 className="text-lg font-bold text-white mt-2">
                   {isCurrentlyDisabled ? 'Cho vào lại?' : 'Nghỉ chơi?'}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  <strong className="text-gray-900 dark:text-white">{p?.name}</strong>
+                <p className="text-sm text-gray-400 mt-1">
+                  <strong className="text-white">{p?.name}</strong>
                   {isCurrentlyDisabled ? ' sẽ tham gia lại ván' : ' sẽ nghỉ, tiền giữ nguyên'}
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <button onClick={() => setConfirmDisable(null)}
-                  className="py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold transition-colors touch-bounce">
+                  className="py-3 rounded-2xl bg-gray-700 text-gray-300 font-semibold transition-colors touch-bounce">
                   Hủy
                 </button>
                 <button onClick={() => { onToggleDisabled?.(confirmDisable); setConfirmDisable(null) }}
@@ -298,12 +298,12 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
       {/* Add player popup */}
       {showAddPlayer && (
         <div className="fixed inset-0 modal-backdrop z-50 flex items-end sm:items-center justify-center animate-fade-in">
-          <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-white/30 dark:border-gray-700/40">
-            <div className="w-10 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto sm:hidden" />
+          <div className="bg-gray-800/95 backdrop-blur-xl rounded-t-3xl sm:rounded-3xl shadow-2xl p-6 w-full sm:max-w-sm space-y-4 animate-slide-up border-t border-white/15">
+            <div className="w-10 h-1 bg-gray-600 rounded-full mx-auto sm:hidden" />
             <div className="text-center">
               <span className="text-3xl">👤</span>
-              <h3 className="text-lg font-bold text-gray-900 dark:text-white mt-2">Thêm người chơi</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Bắt đầu với 0đ</p>
+              <h3 className="text-lg font-bold text-white mt-2">Thêm người chơi</h3>
+              <p className="text-sm text-gray-400 mt-1">Bắt đầu với 0đ</p>
             </div>
             <input
               type="text"
@@ -311,11 +311,11 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
               onChange={e => setNewPlayerName(e.target.value)}
               placeholder="Tên người chơi"
               autoFocus
-              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600/50 text-gray-900 dark:text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-gray-700/80 border border-gray-600/50 text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500"
             />
             <div className="grid grid-cols-2 gap-3">
               <button onClick={() => { setShowAddPlayer(false); setNewPlayerName('') }}
-                className="py-3 rounded-2xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-semibold transition-colors touch-bounce">
+                className="py-3 rounded-2xl bg-gray-700 text-gray-300 font-semibold transition-colors touch-bounce">
                 Hủy
               </button>
               <button onClick={() => {

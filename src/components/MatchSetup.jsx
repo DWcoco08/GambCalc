@@ -27,20 +27,20 @@ export default function MatchSetup({ gameId, onStart }) {
   }
 
   const setupForm = (
-    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-3xl shadow-xl p-5 lg:p-8 space-y-5 lg:space-y-6 border border-white/30 dark:border-gray-700/40 animate-scale-in">
+    <div className="bg-gray-800/95 backdrop-blur-xl rounded-3xl shadow-xl p-5 lg:p-8 space-y-5 lg:space-y-6 border border-white/15 animate-scale-in">
       {/* Header */}
       <div className="text-center pt-2">
         <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg shadow-purple-500/30 mb-3">
           {game.icon}
         </div>
-        <h2 className="text-xl font-extrabold text-gray-900 dark:text-white">{game.name}</h2>
-        <p className="text-gray-400 dark:text-gray-500 text-xs mt-1 font-medium">Tạo ván mới</p>
+        <h2 className="text-xl font-extrabold text-white">{game.name}</h2>
+        <p className="text-gray-500 text-xs mt-1 font-medium">Tạo ván mới</p>
       </div>
 
       {/* Base bet - only for games that use it */}
       {!game.hideBaseBet && (
         <div>
-          <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Mức cược</label>
+          <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Mức cược</label>
           <div className="grid grid-cols-4 gap-2">
             {[1000, 2000, 5000, 10000].map(bet => (
               <button
@@ -49,7 +49,7 @@ export default function MatchSetup({ gameId, onStart }) {
                 className={`py-2.5 rounded-xl text-sm font-bold transition-all touch-bounce ${
                   baseBet === bet
                     ? 'bg-gradient-to-br from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/30 scale-105'
-                    : 'bg-gray-100 dark:bg-gray-700/80 text-gray-500 dark:text-gray-400'
+                    : 'bg-gray-700/80 text-gray-400'
                 }`}
               >
                 {(bet / 1000)}k
@@ -70,7 +70,7 @@ export default function MatchSetup({ gameId, onStart }) {
 
       {/* Players */}
       <div>
-        <label className="block text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">
+        <label className="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
           Người chơi ({players.length}/{game.maxPlayers})
         </label>
         <div className="space-y-2">
@@ -84,7 +84,7 @@ export default function MatchSetup({ gameId, onStart }) {
                 value={name}
                 onChange={e => updateName(i, e.target.value)}
                 placeholder={`Player ${i + 1}`}
-                className="flex-1 px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/80 border border-gray-200 dark:border-gray-600/50 text-gray-900 dark:text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="flex-1 px-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700/80 border border-gray-600/50 text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               />
               {players.length > game.minPlayers && (
                 <button
@@ -100,7 +100,7 @@ export default function MatchSetup({ gameId, onStart }) {
         {players.length < game.maxPlayers && (
           <button
             onClick={addPlayer}
-            className="mt-2 w-full py-3 border-2 border-dashed border-gray-200 dark:border-gray-600/50 rounded-xl text-sm font-semibold text-gray-400 transition-all touch-bounce hover:border-purple-400 hover:text-purple-500"
+            className="mt-2 w-full py-3 border-2 border-dashed border-gray-600/50 rounded-xl text-sm font-semibold text-gray-400 transition-all touch-bounce hover:border-purple-400 hover:text-purple-500"
           >
             + Thêm người chơi
           </button>
@@ -132,7 +132,7 @@ export default function MatchSetup({ gameId, onStart }) {
           <div>
             <button
               onClick={() => setShowGuide(!showGuide)}
-              className="w-full py-3 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md rounded-2xl border border-white/20 dark:border-gray-700/30 text-sm font-semibold text-gray-500 dark:text-gray-400 touch-bounce flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gray-800/90 backdrop-blur-md rounded-2xl border border-white/10 text-sm font-semibold text-gray-400 touch-bounce flex items-center justify-center gap-2"
             >
               📖 {showGuide ? 'Ẩn hướng dẫn' : 'Xem hướng dẫn chơi'}
               <span className={`transition-transform ${showGuide ? 'rotate-180' : ''}`}>▾</span>

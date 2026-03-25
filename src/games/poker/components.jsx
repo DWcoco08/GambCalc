@@ -215,7 +215,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
 
       {/* Phase: Betting */}
       {phase === 'betting' && (
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl animate-fade-in">
+        <div className="bg-gray-800/95 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl animate-fade-in">
           <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-3">Đặt chip vào pot</h3>
           <div className="space-y-3">
             {players.map(player => {
@@ -266,7 +266,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
 
       {/* Phase: Rounds */}
       {phase === 'round' && (
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl animate-slide-up">
+        <div className="bg-gray-800/95 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl animate-slide-up">
           <p className="text-center text-xs font-bold text-yellow-400 mb-1">{ROUND_LABELS[roundNum]}</p>
           <p className="text-center text-[10px] text-white/40 mb-3">
             Còn {inHandPlayers.length} người · Pot: {pot}
@@ -388,7 +388,7 @@ export default function PokerBoard({ players, onAction, onViewPlayer, baseBet, d
 
       {/* Phase: Winner */}
       {phase === 'winner' && (
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-xl animate-slide-up">
+        <div className="bg-gray-800/95 backdrop-blur-xl rounded-2xl border border-white/15 p-4 shadow-xl animate-slide-up">
           <p className="text-center text-xs font-bold text-yellow-400 mb-3">🏆 Ai thắng? · Pot: {pot}</p>
           {inHandPlayers.length === 1 ? (
             <div className="text-center space-y-3">
