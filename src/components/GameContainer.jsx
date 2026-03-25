@@ -9,7 +9,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
   const [summary, setSummary] = useState(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [viewingPlayer, setViewingPlayer] = useState(null)
-  const [showLog, setShowLog] = useState(false)
+  const [showLog, setShowLog] = useState(true) // default open
   const game = getGame(gameId)
 
   if (!game) {
@@ -86,8 +86,43 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
 
   return (
     <>
-      {/* Main content - full width */}
-      <div className="space-y-4 animate-fade-in">
+      {/* Desktop: board + optional log panel side by side */}
+      <div className="hidden lg:block animate-fade-in">
+        <div className="mb-4">{statusBar}</div>
+        <div className="flex gap-6 items-start">
+          <div className={`${showLog ? 'flex-1' : 'w-full'} space-y-4 overflow-visible min-w-0`}>
+            <BoardComponent
+              players={match.players}
+              onAction={onAction}
+              onViewPlayer={setViewingPlayer}
+              onResetStreak={onResetStreak}
+              onToggleDisabled={onToggleDisabled}
+              onAddPlayer={onAddPlayer}
+              baseBet={match.baseBet}
+              disabled={!match.active}
+              match={match}
+            />
+          </div>
+          {showLog && (
+            <div className="w-80 shrink-0 sticky top-4 bg-black/30 backdrop-blur-sm rounded-2xl border border-white/10 flex flex-col max-h-[80vh] animate-slide-in-right">
+              <div className="p-4 border-b border-white/10 flex items-center justify-between shrink-0">
+                <h3 className="text-xs font-bold text-white/50 uppercase tracking-wider">
+                  Lịch sử ({logCount} ván)
+                </h3>
+                <button onClick={() => setShowLog(false)} className="w-7 h-7 flex items-center justify-center rounded-lg text-white/30 hover:text-white hover:bg-white/10 touch-bounce text-xs">
+                  ✕
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4">
+                <LogPanel logs={match.logs} gameName={game.name} />
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile: single column */}
+      <div className="lg:hidden space-y-4 animate-fade-in">
         {statusBar}
 
         <BoardComponent
@@ -102,9 +137,8 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
           match={match}
         />
 
-        {/* Log toggle - mobile only */}
         {showLog && (
-          <div className="lg:hidden animate-slide-up">
+          <div className="animate-slide-up">
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-sm">
               <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
                 Lịch sử ({logCount} ván)
@@ -114,29 +148,6 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
           </div>
         )}
       </div>
-
-      {/* Log drawer - slide from right (desktop + mobile) */}
-      {showLog && (
-        <div className="hidden lg:block fixed inset-0 z-40 animate-fade-in" onClick={() => setShowLog(false)}>
-          <div className="absolute inset-0 bg-black/30" />
-          <div
-            className="absolute top-0 right-0 h-full w-96 bg-black/40 backdrop-blur-xl border-l border-white/10 shadow-2xl animate-slide-in-right flex flex-col"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0">
-              <h3 className="text-sm font-bold text-white/60 uppercase tracking-wider">
-                Lịch sử ({logCount} ván)
-              </h3>
-              <button onClick={() => setShowLog(false)} className="w-8 h-8 flex items-center justify-center rounded-xl text-white/40 hover:text-white hover:bg-white/10 touch-bounce">
-                ✕
-              </button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-5">
-              <LogPanel logs={match.logs} gameName={game.name} />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modals (shared) */}
       {showEndConfirm && (

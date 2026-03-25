@@ -45,8 +45,8 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
   return (
     <div className="space-y-4">
       {/* Player cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 lg:gap-4 overflow-visible">
-        {players.map((player, idx) => {
+      <div className="space-y-3 lg:space-y-4 overflow-visible">
+        {[...players].sort((a, b) => (a.gameState?.disabled ? 1 : 0) - (b.gameState?.disabled ? 1 : 0)).map((player, idx) => {
           const isDisabled = player.gameState?.disabled
           const isSelected = selectedPlayer === player.id
           const isWinning = player.money > 0
@@ -78,9 +78,9 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
               )}
 
               <button
-                disabled={disabled || isDisabled}
+                disabled={disabled}
                 onClick={() => !isDisabled && setSelectedPlayer(isSelected ? null : player.id)}
-                className={`relative w-full p-5 lg:p-8 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce
+                className={`relative w-full p-4 lg:p-5 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce
                   ${isDisabled
                     ? 'border-gray-600/30 bg-black/40 opacity-40 cursor-default'
                     : isSelected
@@ -97,102 +97,74 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                   ${player.animClass || ''}
                 `}
               >
-                {/* Background decoration - win */}
-                {isDemon && (
-                  <>
-                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-red-500/25 via-purple-500/15 to-transparent rounded-bl-full" />
-                    <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-purple-500/20 to-transparent rounded-tr-full" />
-                  </>
-                )}
-                {isOnFire && !isDemon && (
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-orange-300/20 to-transparent rounded-bl-full" />
-                )}
-                {/* Background decoration - lose */}
-                {isOnIce && !isOnFire && (
-                  <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-blue-300/15 to-transparent rounded-bl-full" />
-                )}
-
-                {/* Name + disable toggle */}
-                <div className="flex items-center justify-between gap-1">
-                  <div className="font-bold text-gray-900 dark:text-white truncate text-base lg:text-xl">
-                    {player.name}
-                  </div>
-                  {!disabled && (
-                    <span
-                      onClick={(e) => { e.stopPropagation(); setConfirmDisable(player.id) }}
-                      className={`shrink-0 w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center rounded-lg text-[10px] lg:text-xs cursor-pointer touch-bounce transition-colors ${
-                        isDisabled ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-white/10 text-white/30 hover:text-white/60 hover:bg-white/20'
-                      }`}
-                      title={isDisabled ? 'Cho vào lại' : 'Nghỉ chơi'}
-                    >
-                      {isDisabled ? '▶' : '⏸'}
-                    </span>
-                  )}
-                </div>
-
-                {/* Money */}
-                <div className={`text-3xl lg:text-5xl font-extrabold mt-1 lg:mt-2 tracking-tight ${
-                  isDisabled ? 'text-gray-500' : isWinning ? 'text-green-500' : isLosing ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'
-                }`}>
-                  {player.money > 0 ? '+' : ''}{formatMoney(player.money)}
-                </div>
-                {isDisabled && <div className="text-xs lg:text-sm text-gray-500 font-bold">Nghỉ chơi</div>}
-
-                {/* Streak badges */}
-                <div className="flex items-center gap-1.5 lg:gap-2 mt-2 lg:mt-3 flex-wrap">
-                  {/* Win streak */}
-                  {streak > 0 && !isDisabled && (
-                    <span className={`inline-flex items-center gap-0.5 px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg text-xs lg:text-base font-bold ${
-                      isDemon
-                        ? 'bg-gradient-to-r from-red-600 via-purple-600 to-red-600 text-white shadow-lg shadow-red-500/50 animate-demon-badge'
-                        : isOnFire
-                        ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md shadow-orange-500/30 animate-streak-fire'
-                        : 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400'
+                {/* Horizontal card layout */}
+                <div className="flex items-center gap-4 lg:gap-6">
+                  {/* Left: Name + Money */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className={`font-bold truncate text-base lg:text-xl ${isDisabled ? 'text-gray-500' : 'text-white'}`}>
+                        {player.name}
+                      </div>
+                      {isDisabled && <span className="text-[10px] lg:text-xs text-gray-500 font-bold shrink-0">Nghỉ</span>}
+                    </div>
+                    <div className={`text-3xl lg:text-5xl font-extrabold tracking-tight ${
+                      isDisabled ? 'text-gray-500' : isWinning ? 'text-green-500' : isLosing ? 'text-red-500' : 'text-gray-400'
                     }`}>
-                      {isDemon ? '👹' : '🔥'} {streak}
-                    </span>
-                  )}
-                  {/* Reset streak button - only show when streak >= 2 */}
-                  {streak >= 2 && (
-                    <span
-                      onClick={(e) => { e.stopPropagation(); setConfirmReset(player.id) }}
-                      className="inline-flex items-center px-1.5 py-1 rounded-lg text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-400 dark:text-red-500 cursor-pointer hover:bg-red-200 dark:hover:bg-red-900/50 transition-colors touch-bounce"
-                      title="Hủy chuỗi (gian lận)"
-                    >
-                      ✕
-                    </span>
-                  )}
+                      {player.money > 0 ? '+' : ''}{formatMoney(player.money)}
+                    </div>
+                    {/* Badges */}
+                    {!isDisabled && (
+                      <div className="flex items-center gap-1.5 lg:gap-2 mt-1.5 lg:mt-2 flex-wrap">
+                        {streak > 0 && (
+                          <span className={`inline-flex items-center gap-0.5 px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg text-xs lg:text-sm font-bold ${
+                            isDemon ? 'bg-gradient-to-r from-red-600 via-purple-600 to-red-600 text-white shadow-lg shadow-red-500/50 animate-demon-badge'
+                              : isOnFire ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md shadow-orange-500/30 animate-streak-fire'
+                              : 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400'
+                          }`}>
+                            {isDemon ? '👹' : '🔥'} {streak}
+                          </span>
+                        )}
+                        {streak >= 2 && (
+                          <span onClick={(e) => { e.stopPropagation(); setConfirmReset(player.id) }}
+                            className="inline-flex items-center px-1.5 py-1 rounded-lg text-[10px] font-bold bg-red-100 dark:bg-red-900/30 text-red-400 cursor-pointer hover:bg-red-200 dark:hover:bg-red-900/50 touch-bounce">✕</span>
+                        )}
+                        {loseMilestone && (
+                          <span className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-bold bg-gradient-to-r ${loseMilestone.color} ${loseMilestone.text} shadow-md ${loseMilestone.glow} ${loseStreak >= 10 ? 'animate-lose-shake' : ''}`}>
+                            {loseMilestone.icon} {loseStreak}
+                          </span>
+                        )}
+                        {loseStreak >= 3 && loseStreak < 5 && (
+                          <span className="inline-flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-500">📉 {loseStreak}</span>
+                        )}
+                        {moneyLossMilestone && (
+                          <span className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-gradient-to-r ${moneyLossMilestone.color} ${moneyLossMilestone.text} shadow-sm ring-1 ${moneyLossMilestone.border}`}>
+                            {moneyLossMilestone.icon} {moneyLossMilestone.label}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-                  {/* Lose streak */}
-                  {loseMilestone && (
-                    <span className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-bold bg-gradient-to-r ${loseMilestone.color} ${loseMilestone.text} shadow-md ${loseMilestone.glow} ${loseStreak >= 10 ? 'animate-lose-shake' : ''}`}>
-                      {loseMilestone.icon} {loseStreak}
+                  {/* Right: Actions */}
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <span onClick={(e) => { e.stopPropagation(); onViewPlayer?.(player.id) }}
+                      className="inline-flex items-center px-2.5 py-1.5 bg-white/10 text-white/40 rounded-lg text-[10px] lg:text-xs font-semibold touch-bounce hover:bg-purple-500/20 hover:text-purple-400 transition-colors">
+                      Chi tiết
                     </span>
-                  )}
-                  {loseStreak >= 3 && loseStreak < 5 && (
-                    <span className="inline-flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-bold bg-red-100 dark:bg-red-900/30 text-red-500 dark:text-red-400">
-                      📉 {loseStreak}
-                    </span>
-                  )}
-
-                  {/* Money loss milestone */}
-                  {moneyLossMilestone && (
-                    <span className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-gradient-to-r ${moneyLossMilestone.color} ${moneyLossMilestone.text} shadow-sm ring-1 ${moneyLossMilestone.border}`}>
-                      {moneyLossMilestone.icon} {moneyLossMilestone.label}
-                    </span>
-                  )}
-
-                  <span
-                    onClick={(e) => { e.stopPropagation(); onViewPlayer?.(player.id) }}
-                    className="inline-flex items-center px-2 py-1 bg-gray-100/80 dark:bg-gray-700/80 text-gray-400 dark:text-gray-500 rounded-lg text-[10px] lg:text-xs font-semibold uppercase tracking-wider touch-bounce hover:bg-purple-100 hover:text-purple-600 dark:hover:bg-purple-900/30 dark:hover:text-purple-400 transition-colors"
-                  >
-                    Chi tiết
-                  </span>
+                    {!disabled && (
+                      <span onClick={(e) => { e.stopPropagation(); setConfirmDisable(player.id) }}
+                        className={`inline-flex items-center px-2.5 py-1.5 rounded-lg text-[10px] lg:text-xs font-bold cursor-pointer touch-bounce transition-colors ${
+                          isDisabled ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-white/10 text-white/30 hover:bg-white/20 hover:text-white/60'
+                        }`}>
+                        {isDisabled ? '▶ Vào lại' : '⏸ Nghỉ'}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* Money change badge */}
                 {player.lastChange != null && player.lastChange !== 0 && (
-                  <div className={`absolute -top-1.5 -right-1.5 px-2.5 py-1 rounded-xl text-xs font-extrabold animate-bounce-in shadow-lg ${
+                  <div className={`absolute -top-2 -right-2 px-3 py-1 rounded-xl text-sm lg:text-base font-extrabold animate-bounce-in shadow-lg ${
                     player.lastChange > 0
                       ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-green-500/40'
                       : 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-red-500/40'
@@ -202,7 +174,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                 )}
 
                 {isSelected && (
-                  <div className="absolute top-1 left-1 animate-ring-pulse w-2 h-2 rounded-full bg-purple-500" />
+                  <div className="absolute top-2 left-2 animate-ring-pulse w-3 h-3 rounded-full bg-purple-500" />
                 )}
               </button>
             </div>
@@ -213,10 +185,10 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
         {!disabled && players.length < 8 && (
           <button
             onClick={() => setShowAddPlayer(true)}
-            className="p-4 lg:p-6 rounded-2xl border-2 border-dashed border-white/20 text-white/30 hover:border-white/40 hover:text-white/50 transition-all touch-bounce flex flex-col items-center justify-center gap-1 min-h-[100px]"
+            className="w-full p-4 lg:p-5 rounded-2xl border-2 border-dashed border-white/20 text-white/30 hover:border-white/40 hover:text-white/50 transition-all touch-bounce flex items-center justify-center gap-2"
           >
-            <span className="text-2xl">+</span>
-            <span className="text-[10px] lg:text-xs font-bold">Thêm người</span>
+            <span className="text-xl">+</span>
+            <span className="text-sm lg:text-base font-bold">Thêm người chơi</span>
           </button>
         )}
       </div>
