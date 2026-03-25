@@ -80,7 +80,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
               <button
                 disabled={disabled}
                 onClick={() => !isDisabled && setSelectedPlayer(isSelected ? null : player.id)}
-                className={`relative w-full p-4 lg:p-5 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce overflow-hidden
+                className={`relative w-full p-4 lg:p-5 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce
                   ${isDisabled
                     ? 'border-gray-700 bg-gray-900 opacity-50 cursor-default'
                     : isSelected
@@ -107,7 +107,8 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                   ${player.animClass || ''}
                 `}
               >
-                {/* Card particles based on streak */}
+                {/* Card particles - clipped inside card */}
+                <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
                 {isDemon && Array.from({ length: 6 }).map((_, i) => (
                   <div key={`fire-${i}`} className="absolute animate-card-fire" style={{
                     left: `${10 + i * 15}%`, bottom: 0,
@@ -157,6 +158,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                     animationDelay: `${i * 0.5}s`,
                   }}>💀</div>
                 ))}
+                </div>
 
                 {/* Horizontal card layout */}
                 <div className="flex items-center gap-3 lg:gap-5">
@@ -185,7 +187,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                     </div>
                     {/* Badges */}
                     {!isDisabled && (streak > 0 || loseMilestone || (loseStreak >= 3) || moneyLossMilestone) && (
-                      <div className="flex items-center gap-1.5 lg:gap-2 mt-1.5 flex-wrap overflow-visible relative z-10">
+                      <div className="flex items-center gap-1.5 lg:gap-2 mt-1.5 flex-wrap relative z-10">
                         {streak > 0 && (
                           <span className={`inline-flex items-center gap-0.5 px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg text-xs lg:text-sm font-bold ${
                             isDemon ? 'bg-gradient-to-r from-red-600 via-purple-600 to-red-600 text-white shadow-lg shadow-red-500/50 animate-demon-badge'
