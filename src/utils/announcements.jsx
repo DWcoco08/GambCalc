@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import gsap from 'gsap'
 import { animateToast, dismissToast, screenShake, screenFlash, screenDarken, fireEffect, rainEffect, lightningFlash, snowEffect, horrorEffect, shatterEffect } from './effects'
+import FireBorder from './fireBorder'
 
 // ==================== WIN STREAK CONFIG ====================
 const WIN_CONFIG = {
@@ -222,62 +222,6 @@ export function useAnnouncements() {
     })
   }, [announce])
 
-  // Fire border particles
-  const fireRef = useRef(null)
-  useEffect(() => {
-    if (!current?.fireBorder || !fireRef.current) return
-    const container = fireRef.current
-    const isLight = current.fireBorder === 'light'
-    const isDemon = current.fireBorder === 'demon'
-    const count = isLight ? 12 : isDemon ? 24 : 18
-    const emojis = isDemon ? ['🔥', '⚡', '💜', '🟣', '👹'] : ['🔥', '✨', '💥']
-    const particles = []
-
-    for (let i = 0; i < count; i++) {
-      const p = document.createElement('div')
-      p.textContent = emojis[i % emojis.length]
-      p.style.cssText = 'position:absolute;pointer-events:none;will-change:transform,opacity;'
-      p.style.fontSize = `${14 + Math.random() * 12}px`
-      container.appendChild(p)
-      particles.push(p)
-
-      // Position around border (top, right, bottom, left)
-      const side = i % 4
-      let x, y
-      if (side === 0) { x = Math.random() * 100; y = -8 } // top
-      else if (side === 1) { x = 105; y = Math.random() * 100 } // right
-      else if (side === 2) { x = Math.random() * 100; y = 105 } // bottom
-      else { x = -8; y = Math.random() * 100 } // left
-
-      gsap.set(p, { left: `${x}%`, top: `${y}%`, opacity: 0, scale: 0.5 })
-
-      // Animate: float upward + flicker
-      gsap.to(p, {
-        y: -20 - Math.random() * 40,
-        x: (Math.random() - 0.5) * 30,
-        opacity: 1,
-        scale: 0.8 + Math.random() * 0.6,
-        duration: 0.4 + Math.random() * 0.3,
-        delay: Math.random() * 0.5,
-        ease: 'power1.out',
-        onComplete: () => {
-          // Loop: flicker and float
-          gsap.to(p, {
-            y: `-=${20 + Math.random() * 30}`,
-            opacity: 0.3 + Math.random() * 0.7,
-            scale: 0.5 + Math.random() * 0.8,
-            duration: 0.5 + Math.random() * 0.5,
-            repeat: -1,
-            yoyo: true,
-            ease: 'sine.inOut',
-          })
-        },
-      })
-    }
-
-    return () => particles.forEach(p => { gsap.killTweensOf(p); p.remove() })
-  }, [current])
-
   const ToastComponent = current ? (
     <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center px-4">
       <div
@@ -285,9 +229,12 @@ export function useAnnouncements() {
         className="relative"
         style={{ opacity: 0, transform: 'scale(0)' }}
       >
-        {/* Fire border container */}
+        {/* Canvas fire border */}
         {current.fireBorder && (
-          <div ref={fireRef} className="absolute -inset-6 pointer-events-none overflow-visible" />
+          <FireBorder
+            intensity={current.fireBorder === 'demon' ? 2 : current.fireBorder === 'medium' ? 1.5 : 1}
+            type={current.fireBorder}
+          />
         )}
         {/* Toast content */}
         <div className={`relative bg-gradient-to-r ${current.color} px-10 py-8 rounded-3xl shadow-2xl text-center max-w-lg w-full border-2 ${current.border || 'border-white/20'}`}>
