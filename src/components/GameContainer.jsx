@@ -27,7 +27,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
       if (actionId === 'instant') {
         const instantTexts = [
           'Tất cả quỳ xuống! Bố mày là nhà vua!',
-          'Cảm ơn anh, anh Phúng thanh độ, anh độ!',
+          'Cảm ơn anh! Anh Phùng Thanh Độ, anh Độ Mixi!!!',
           'Chưa tày đâu mấy em, nhìn anh mà học!',
           'Tao đúp hết cho tụi bây khóc luôn!',
           'Ăn trắng! Nhân đôi tiền thắng! Sướng chưa!',
