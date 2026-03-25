@@ -158,7 +158,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                       className={`shrink-0 w-16 lg:w-20 self-stretch flex flex-col items-center justify-center rounded-xl cursor-pointer touch-bounce transition-colors ${
                         isDisabled
                           ? 'bg-green-500/15 text-green-400 hover:bg-green-500/25'
-                          : 'bg-white/5 text-white/25 hover:bg-white/10 hover:text-white/50'
+                          : 'bg-red-500/10 text-red-400/60 hover:bg-red-500/20 hover:text-red-400'
                       }`}
                     >
                       <span className="text-lg lg:text-xl">{isDisabled ? '▶' : '⏸'}</span>
