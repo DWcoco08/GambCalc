@@ -88,16 +88,26 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                 onClick={() => !isDisabled && setSelectedPlayer(isSelected ? null : player.id)}
                 className={`relative w-full p-4 lg:p-5 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce
                   ${isDisabled
-                    ? 'border-gray-600/30 bg-gray-900/80 opacity-50 cursor-default'
+                    ? 'border-gray-700 bg-gray-900 opacity-50 cursor-default'
                     : isSelected
-                    ? 'border-purple-500 bg-purple-500/10 dark:bg-purple-500/15 shadow-xl shadow-purple-500/25 scale-[1.03] z-10'
+                    ? 'border-purple-500 bg-gradient-to-r from-purple-900 to-purple-800 shadow-xl shadow-purple-500/25 scale-[1.03] z-10'
                     : isDemon
-                      ? 'border-red-500/60 bg-gradient-to-br from-red-950/40 via-purple-950/30 to-red-950/40 dark:from-red-950/60 dark:via-purple-950/40 dark:to-red-950/60 shadow-xl shadow-red-500/30 animate-demon-card'
+                      ? 'border-red-500 bg-gradient-to-r from-red-900 via-purple-900 to-red-900 shadow-xl shadow-red-500/30 animate-demon-card'
                       : isOnFire
-                      ? 'border-orange-400/50 bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/20 shadow-lg'
-                      : isOnIce
-                        ? 'border-blue-300/50 dark:border-blue-800/50 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/20 shadow-lg'
-                        : 'border-white/20 dark:border-gray-600/40 bg-gray-800/90 backdrop-blur-md shadow-sm hover:shadow-md'
+                      ? 'border-orange-500 bg-gradient-to-r from-orange-900 to-red-900 shadow-lg shadow-orange-500/20'
+                      : loseStreak >= 30
+                        ? 'border-gray-600 bg-gray-950 shadow-lg'
+                        : loseStreak >= 25
+                        ? 'border-gray-600 bg-gradient-to-r from-gray-900 to-gray-950 shadow-lg'
+                        : loseStreak >= 20
+                        ? 'border-cyan-700 bg-gradient-to-r from-cyan-950 to-blue-950 shadow-lg shadow-cyan-500/10'
+                        : loseStreak >= 15
+                        ? 'border-blue-700 bg-gradient-to-r from-blue-950 to-gray-900 shadow-lg'
+                        : loseStreak >= 10
+                        ? 'border-blue-800 bg-gradient-to-r from-blue-950 to-blue-900 shadow-lg'
+                        : loseStreak >= 5
+                        ? 'border-gray-600 bg-gradient-to-r from-gray-800 to-gray-900 shadow-md'
+                        : 'border-gray-700 bg-gray-800 shadow-sm hover:shadow-md hover:border-gray-600'
                   }
                   ${disabled ? 'opacity-50' : ''}
                   ${player.animClass || ''}
