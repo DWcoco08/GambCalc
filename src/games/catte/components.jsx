@@ -80,7 +80,7 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
               <button
                 disabled={disabled || isDisabled}
                 onClick={() => !isDisabled && setSelectedPlayer(isSelected ? null : player.id)}
-                className={`relative w-full p-4 lg:p-6 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce
+                className={`relative w-full p-5 lg:p-8 rounded-2xl border-2 transition-all duration-200 text-left touch-bounce
                   ${isDisabled
                     ? 'border-gray-600/30 bg-black/40 opacity-40 cursor-default'
                     : isSelected
@@ -114,13 +114,13 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
 
                 {/* Name + disable toggle */}
                 <div className="flex items-center justify-between gap-1">
-                  <div className="font-bold text-gray-900 dark:text-white truncate text-[15px] lg:text-lg">
+                  <div className="font-bold text-gray-900 dark:text-white truncate text-base lg:text-xl">
                     {player.name}
                   </div>
                   {!disabled && (
                     <span
                       onClick={(e) => { e.stopPropagation(); setConfirmDisable(player.id) }}
-                      className={`shrink-0 w-6 h-6 lg:w-7 lg:h-7 flex items-center justify-center rounded-lg text-[10px] cursor-pointer touch-bounce transition-colors ${
+                      className={`shrink-0 w-6 h-6 lg:w-8 lg:h-8 flex items-center justify-center rounded-lg text-[10px] lg:text-xs cursor-pointer touch-bounce transition-colors ${
                         isDisabled ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30' : 'bg-white/10 text-white/30 hover:text-white/60 hover:bg-white/20'
                       }`}
                       title={isDisabled ? 'Cho vào lại' : 'Nghỉ chơi'}
@@ -131,18 +131,18 @@ export default function CatteBoard({ players, onAction, onViewPlayer, onResetStr
                 </div>
 
                 {/* Money */}
-                <div className={`text-2xl lg:text-4xl font-extrabold mt-1 tracking-tight ${
+                <div className={`text-3xl lg:text-5xl font-extrabold mt-1 lg:mt-2 tracking-tight ${
                   isDisabled ? 'text-gray-500' : isWinning ? 'text-green-500' : isLosing ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'
                 }`}>
                   {player.money > 0 ? '+' : ''}{formatMoney(player.money)}
                 </div>
-                {isDisabled && <div className="text-[10px] lg:text-xs text-gray-500 font-bold">Nghỉ chơi</div>}
+                {isDisabled && <div className="text-xs lg:text-sm text-gray-500 font-bold">Nghỉ chơi</div>}
 
                 {/* Streak badges */}
-                <div className="flex items-center gap-1.5 mt-2 lg:mt-3 flex-wrap">
+                <div className="flex items-center gap-1.5 lg:gap-2 mt-2 lg:mt-3 flex-wrap">
                   {/* Win streak */}
                   {streak > 0 && !isDisabled && (
-                    <span className={`inline-flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs lg:text-sm font-bold ${
+                    <span className={`inline-flex items-center gap-0.5 px-2 lg:px-3 py-1 lg:py-1.5 rounded-lg text-xs lg:text-base font-bold ${
                       isDemon
                         ? 'bg-gradient-to-r from-red-600 via-purple-600 to-red-600 text-white shadow-lg shadow-red-500/50 animate-demon-badge'
                         : isOnFire

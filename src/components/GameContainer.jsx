@@ -63,7 +63,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
         </button>
         {/* Log toggle - mobile only */}
         <button onClick={() => setShowLog(!showLog)}
-          className={`lg:hidden w-10 h-10 flex items-center justify-center rounded-xl border shadow-sm transition-all touch-bounce ${
+          className={`w-10 h-10 flex items-center justify-center rounded-xl border shadow-sm transition-all touch-bounce ${
             showLog
               ? 'bg-purple-500 border-purple-500 text-white shadow-purple-500/30'
               : 'bg-white dark:bg-gray-800 border-gray-100 dark:border-gray-700/80 text-gray-500 dark:text-gray-400'
@@ -82,63 +82,61 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
     </div>
   )
 
-  const logPanel = (
-    <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 lg:p-5 shadow-sm flex flex-col lg:max-h-[80vh]">
-      <h3 className="text-xs lg:text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3 shrink-0">
-        Lịch sử ({match.logs.filter(l => l.action === 'Win' || l.action === 'Instant Win' || l.action === 'Win Pot').length} ván)
-      </h3>
-      <div className="flex-1 min-h-0 overflow-y-auto">
-        <LogPanel logs={match.logs} gameName={game.name} />
-      </div>
-    </div>
-  )
+  const logCount = match.logs.filter(l => l.action === 'Win' || l.action === 'Instant Win' || l.action === 'Win Pot').length
 
   return (
     <>
-      {/* Desktop: 2 columns - board left, log right */}
-      <div className="hidden lg:block animate-fade-in">
-        <div className="mb-4">{statusBar}</div>
-        <div className="grid grid-cols-5 gap-8 items-start">
-          {/* Board - 3 cols */}
-          <div className="col-span-3 space-y-4 overflow-visible">
-            <BoardComponent
-              players={match.players}
-              onAction={onAction}
-              onViewPlayer={setViewingPlayer}
-              onResetStreak={onResetStreak}
-              onToggleDisabled={onToggleDisabled}
-              onAddPlayer={onAddPlayer}
-              baseBet={match.baseBet}
-              disabled={!match.active}
-              match={match}
-            />
-          </div>
-          {/* Log - 2 cols, sticky */}
-          <div className="col-span-2 sticky top-4">
-            {logPanel}
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile: single column */}
-      <div className="lg:hidden space-y-4 animate-fade-in">
+      {/* Main content - full width */}
+      <div className="space-y-4 animate-fade-in">
         {statusBar}
 
         <BoardComponent
           players={match.players}
           onAction={onAction}
           onViewPlayer={setViewingPlayer}
+          onResetStreak={onResetStreak}
+          onToggleDisabled={onToggleDisabled}
+          onAddPlayer={onAddPlayer}
           baseBet={match.baseBet}
           disabled={!match.active}
+          match={match}
         />
 
-        {/* Log toggle - mobile */}
+        {/* Log toggle - mobile only */}
         {showLog && (
-          <div className="animate-slide-up">
-            {logPanel}
+          <div className="lg:hidden animate-slide-up">
+            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl rounded-2xl border border-white/30 dark:border-gray-700/40 p-4 shadow-sm">
+              <h3 className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
+                Lịch sử ({logCount} ván)
+              </h3>
+              <LogPanel logs={match.logs} gameName={game.name} />
+            </div>
           </div>
         )}
       </div>
+
+      {/* Log drawer - slide from right (desktop + mobile) */}
+      {showLog && (
+        <div className="hidden lg:block fixed inset-0 z-40 animate-fade-in" onClick={() => setShowLog(false)}>
+          <div className="absolute inset-0 bg-black/30" />
+          <div
+            className="absolute top-0 right-0 h-full w-96 bg-black/40 backdrop-blur-xl border-l border-white/10 shadow-2xl animate-slide-in-right flex flex-col"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0">
+              <h3 className="text-sm font-bold text-white/60 uppercase tracking-wider">
+                Lịch sử ({logCount} ván)
+              </h3>
+              <button onClick={() => setShowLog(false)} className="w-8 h-8 flex items-center justify-center rounded-xl text-white/40 hover:text-white hover:bg-white/10 touch-bounce">
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto p-5">
+              <LogPanel logs={match.logs} gameName={game.name} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modals (shared) */}
       {showEndConfirm && (
