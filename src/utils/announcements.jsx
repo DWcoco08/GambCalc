@@ -1,28 +1,102 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { animateToast, dismissToast, screenShake, screenFlash, screenDarken, confettiStreak3, confettiStreak4, demonConfetti, loseConfetti } from './effects'
+import { animateToast, dismissToast, screenShake, screenFlash, screenDarken, fireEffect, rainEffect, lightningFlash, snowEffect, horrorEffect, shatterEffect } from './effects'
 
-const WIN_ANNOUNCEMENTS = {
-  3: { icon: '🔥', text: 'CHUỖI 3!', color: 'from-orange-500 to-red-500', shake: 0, confetti: 'streak3' },
-  4: { icon: '🔥🔥', text: 'CHUỖI 4!', color: 'from-orange-600 to-red-600', shake: 0.5, confetti: 'streak4' },
-  5: { icon: '👹', text: 'DEMON MODE!', color: 'from-red-600 via-purple-600 to-red-600', shake: 2, confetti: 'demon', flash: 'rgba(147,51,234,0.3)' },
-  6: { icon: '👹', text: 'DEMON x6!', color: 'from-red-600 via-purple-600 to-red-600', shake: 2.5, confetti: 'demon', flash: 'rgba(147,51,234,0.4)' },
-  7: { icon: '👹', text: 'DEMON x7!', color: 'from-red-700 via-purple-700 to-red-700', shake: 3, confetti: 'demon', flash: 'rgba(220,38,38,0.4)' },
+// ==================== WIN STREAK CONFIG ====================
+const WIN_CONFIG = {
+  3: {
+    icon: '🔥', title: 'CHUỖI 3!',
+    subtitle: 'Bắt đầu nóng lên rồi!',
+    color: 'from-orange-500 to-red-500',
+    border: 'border-orange-400/50',
+    effect: () => fireEffect(1),
+  },
+  4: {
+    icon: '🔥', title: 'CHUỖI 4!',
+    subtitle: 'Không ai cản được!',
+    color: 'from-orange-600 to-red-600',
+    border: 'border-red-400/50',
+    effect: () => { fireEffect(2); screenShake(0.5) },
+  },
+  5: {
+    icon: '👹', title: 'DEMON MODE!',
+    subtitle: 'Quỷ dữ thức tỉnh! Tất cả hãy coi chừng!',
+    color: 'from-red-600 via-purple-600 to-red-600',
+    border: 'border-purple-400/50',
+    effect: () => { fireEffect(3); screenShake(2); screenFlash('rgba(147,51,234,0.4)') },
+  },
 }
 
-const LOSE_ANNOUNCEMENTS = {
-  5:  { icon: '😰', text: 'THUA CHUỖI 5!', color: 'from-red-500 to-rose-600', shake: 0.5 },
-  10: { icon: '😢', text: 'THUA CHUỖI 10! XUI!', color: 'from-red-600 to-red-800', shake: 1, darken: true },
-  15: { icon: '😭', text: 'THUA CHUỖI 15! THẢM!', color: 'from-red-700 to-red-900', shake: 1.5, darken: true },
-  20: { icon: '🥶', text: 'ĐÓNG BĂNG!', color: 'from-blue-500 to-cyan-600', shake: 2, flash: 'rgba(59,130,246,0.3)' },
-  25: { icon: '💀', text: 'ĐEN!', color: 'from-gray-700 to-gray-900', shake: 2, darken: true },
-  30: { icon: '☠️', text: 'ĐEN TUYỆT ĐỐI!', color: 'from-gray-900 to-black', shake: 3, darken: true, flash: 'rgba(0,0,0,0.5)' },
+// 6+ uses demon but with escalating text
+const DEMON_TEXTS = [
+  'Không thể dừng lại! Quỷ vương giáng thế!',
+  'Cả bàn run sợ trước sức mạnh này!',
+  'Huyền thoại! Không ai dám đặt cược!',
+  'THẦN CHẾT! Mọi chip đều thuộc về ta!',
+]
+
+// ==================== LOSE STREAK CONFIG ====================
+const LOSE_CONFIG = {
+  5: {
+    icon: '😰', title: 'THUA CHUỖI 5!',
+    subtitle: 'Bắt đầu lo lắng... may mắn ở đâu rồi?',
+    color: 'from-red-500 to-rose-600',
+    effect: () => screenShake(0.5),
+  },
+  10: {
+    icon: '😢', title: 'THUA CHUỖI 10!',
+    subtitle: 'Xui xẻo quá! Nước mắt lưng tròng...',
+    color: 'from-red-600 to-red-800',
+    effect: () => { rainEffect(1); screenShake(1) },
+  },
+  15: {
+    icon: '😭', title: 'THUA CHUỖI 15!',
+    subtitle: 'Trời ơi thảm quá! Mưa gió bão bùng!',
+    color: 'from-red-700 to-red-900',
+    effect: () => { rainEffect(2); lightningFlash(); setTimeout(lightningFlash, 800) },
+  },
+  20: {
+    icon: '🥶', title: 'ĐÓNG BĂNG!',
+    subtitle: 'Lạnh cóng! Tay run không cầm nổi bài!',
+    color: 'from-blue-500 to-cyan-600',
+    effect: () => { snowEffect(); screenFlash('rgba(59,130,246,0.3)') },
+  },
+  25: {
+    icon: '💀', title: 'ĐEN!',
+    subtitle: 'Bóng tối bao trùm... liệu còn hy vọng?',
+    color: 'from-gray-700 to-gray-900',
+    effect: () => { horrorEffect(); screenShake(2) },
+  },
+  30: {
+    icon: '☠️', title: 'ĐEN TUYỆT ĐỐI!',
+    subtitle: 'Tận thế! Mọi thứ sụp đổ tan tành!',
+    color: 'from-gray-900 to-black',
+    effect: () => { shatterEffect() },
+  },
 }
 
-const MONEY_ANNOUNCEMENTS = {
-  50000:  { icon: '🔻', text: 'THUA 50K!', color: 'from-red-500 to-red-700', shake: 1 },
-  100000: { icon: '💸', text: 'THUA 100K!', color: 'from-red-700 to-red-900', shake: 2, flash: 'rgba(220,38,38,0.3)' },
-  200000: { icon: '🏚️', text: 'PHÁ SẢN!', color: 'from-gray-900 to-black', shake: 3, darken: true },
+// ==================== MONEY LOSS CONFIG ====================
+const MONEY_CONFIG = {
+  50000: {
+    icon: '🔻', title: 'THUA 50K!',
+    subtitle: 'Ví đang khóc thét!',
+    color: 'from-red-500 to-red-700',
+    effect: () => screenShake(1),
+  },
+  100000: {
+    icon: '💸', title: 'THUA 100K!',
+    subtitle: 'Tiền bay như lá mùa thu!',
+    color: 'from-red-700 to-red-900',
+    effect: () => { screenShake(2); screenFlash('rgba(220,38,38,0.3)') },
+  },
+  200000: {
+    icon: '🏚️', title: 'PHÁ SẢN!',
+    subtitle: 'Nhà cửa cũng không còn... về đi thôi!',
+    color: 'from-gray-900 to-black',
+    effect: () => { screenDarken(); screenShake(3) },
+  },
 }
+
+// ==================== HOOK ====================
 
 export function useAnnouncements() {
   const [queue, setQueue] = useState([])
@@ -32,10 +106,7 @@ export function useAnnouncements() {
 
   const showNext = useCallback(() => {
     setQueue(prev => {
-      if (prev.length === 0) {
-        setCurrent(null)
-        return prev
-      }
+      if (prev.length === 0) { setCurrent(null); return prev }
       const [next, ...rest] = prev
       setCurrent(next)
       return rest
@@ -45,35 +116,27 @@ export function useAnnouncements() {
   useEffect(() => {
     if (current && toastRef.current) {
       animateToast(toastRef.current)
-
-      // Effects
-      if (current.shake) screenShake(current.shake)
-      if (current.flash) screenFlash(current.flash)
-      if (current.darken) screenDarken()
-      if (current.confetti === 'streak3') confettiStreak3()
-      if (current.confetti === 'streak4') confettiStreak4()
-      if (current.confetti === 'demon') demonConfetti()
-      if (current.confetti === 'lose') loseConfetti(current.shake || 1)
-
+      if (current.effect) current.effect()
       timerRef.current = setTimeout(() => {
         dismissToast(toastRef.current, showNext)
-      }, 2500)
+      }, 3000)
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [current, showNext])
 
-  const announce = useCallback((announcement) => {
+  const announce = useCallback((config) => {
     setQueue(prev => {
-      if (prev.length === 0 && !current) {
-        setCurrent(announcement)
-        return prev
-      }
-      return [...prev, announcement]
+      if (prev.length === 0 && !current) { setCurrent(config); return prev }
+      return [...prev, config]
     })
   }, [current])
 
-  // Detect milestones by comparing before/after
   const checkMilestones = useCallback((playersBefore, playersAfter) => {
+    // Collect all players who hit same milestone → merge into 1 announcement
+    const winMilestones = {} // { level: [names] }
+    const loseMilestones = {} // { level: [names] }
+    const moneyMilestones = {} // { amount: [names] }
+
     playersAfter.forEach(after => {
       const before = playersBefore.find(p => p.id === after.id)
       if (!before) return
@@ -85,60 +148,77 @@ export function useAnnouncements() {
       const moneyBefore = before.money || 0
       const moneyAfter = after.money || 0
 
-      // Win streak milestones (3, 4, 5, 6, 7+)
+      // Win streak (3, 4, 5+)
       if (streakAfter > streakBefore && streakAfter >= 3) {
-        const key = Math.min(streakAfter, 7)
-        const config = WIN_ANNOUNCEMENTS[key] || WIN_ANNOUNCEMENTS[5]
-        announce({
-          ...config,
-          name: after.name,
-          text: streakAfter >= 5 ? `DEMON MODE x${streakAfter}!` : config.text,
-        })
+        const key = Math.min(streakAfter, 5)
+        if (!winMilestones[key]) winMilestones[key] = []
+        winMilestones[key].push({ name: after.name, streak: streakAfter })
       }
 
-      // Lose streak milestones (5, 10, 15, 20, 25, 30)
+      // Lose streak (5, 10, 15, 20, 25, 30)
       if (loseAfter > loseBefore) {
-        const milestones = [30, 25, 20, 15, 10, 5]
-        for (const m of milestones) {
+        for (const m of [30, 25, 20, 15, 10, 5]) {
           if (loseAfter >= m && loseBefore < m) {
-            const config = LOSE_ANNOUNCEMENTS[m]
-            announce({
-              ...config,
-              name: after.name,
-              confetti: 'lose',
-            })
+            if (!loseMilestones[m]) loseMilestones[m] = []
+            loseMilestones[m].push(after.name)
             break
           }
         }
       }
 
-      // Money loss milestones (-50k, -100k, -200k)
+      // Money milestones
       if (moneyAfter < moneyBefore) {
-        const milestones = [200000, 100000, 50000]
-        for (const m of milestones) {
+        for (const m of [200000, 100000, 50000]) {
           if (Math.abs(moneyAfter) >= m && Math.abs(moneyBefore) < m) {
-            const config = MONEY_ANNOUNCEMENTS[m]
-            announce({
-              ...config,
-              name: after.name,
-            })
+            if (!moneyMilestones[m]) moneyMilestones[m] = []
+            moneyMilestones[m].push(after.name)
             break
           }
         }
       }
     })
+
+    // Fire win announcements
+    Object.entries(winMilestones).forEach(([level, players]) => {
+      const lvl = parseInt(level)
+      const config = lvl >= 5 ? WIN_CONFIG[5] : WIN_CONFIG[lvl]
+      if (!config) return
+      const names = players.map(p => p.name).join(', ')
+      const streak = players[0].streak
+      announce({
+        ...config,
+        names,
+        title: streak >= 6 ? `DEMON x${streak}!` : config.title,
+        subtitle: streak >= 6 ? DEMON_TEXTS[Math.min(streak - 6, DEMON_TEXTS.length - 1)] : config.subtitle,
+      })
+    })
+
+    // Fire lose announcements (merge same milestone)
+    Object.entries(loseMilestones).forEach(([level, names]) => {
+      const config = LOSE_CONFIG[parseInt(level)]
+      if (!config) return
+      announce({ ...config, names: names.join(', ') })
+    })
+
+    // Fire money announcements
+    Object.entries(moneyMilestones).forEach(([amount, names]) => {
+      const config = MONEY_CONFIG[parseInt(amount)]
+      if (!config) return
+      announce({ ...config, names: names.join(', ') })
+    })
   }, [announce])
 
   const ToastComponent = current ? (
-    <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center">
+    <div className="fixed inset-0 z-[100] pointer-events-none flex items-center justify-center px-4">
       <div
         ref={toastRef}
-        className={`bg-gradient-to-r ${current.color} px-8 py-5 rounded-3xl shadow-2xl text-center max-w-md`}
+        className={`bg-gradient-to-r ${current.color} px-10 py-8 rounded-3xl shadow-2xl text-center max-w-lg w-full border-2 ${current.border || 'border-white/20'}`}
         style={{ opacity: 0, transform: 'scale(0)' }}
       >
-        <div className="text-5xl mb-2">{current.icon}</div>
-        <div className="text-white font-extrabold text-lg">{current.name}</div>
-        <div className="text-white/90 font-extrabold text-2xl tracking-tight">{current.text}</div>
+        <div className="text-6xl mb-3">{current.icon}</div>
+        <div className="text-white/80 font-bold text-base mb-1">{current.names}</div>
+        <div className="text-white font-extrabold text-3xl tracking-tight">{current.title}</div>
+        <div className="text-white/70 text-sm font-medium mt-2 italic">{current.subtitle}</div>
       </div>
     </div>
   ) : null
