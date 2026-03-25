@@ -25,12 +25,19 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
     if (gameId === 'catte') {
       // Tới trắng: flash vàng + toast
       if (actionId === 'instant') {
+        const instantTexts = [
+          'Tất cả quỳ xuống! Bố mày là nhà vua!',
+          'Cảm ơn anh, anh Phúng thanh độ, anh độ!',
+          'Chưa tày đâu mấy em, nhìn anh mà học!',
+          'Tao đúp hết cho tụi bây khóc luôn!',
+          'Ăn trắng! Nhân đôi tiền thắng! Sướng chưa!',
+        ]
         screenFlash('rgba(250,204,21,0.4)', 0.3)
         const winner = match?.players.find(p => p.id === playerId)
         if (winner) {
           announce({
             icon: '⚡', title: 'TỚI TRẮNG!',
-            subtitle: 'Ăn trắng! Nhân đôi tiền thắng!',
+            subtitle: instantTexts[Math.floor(Math.random() * instantTexts.length)],
             names: winner.name,
             color: 'from-yellow-500 to-orange-500',
             border: 'border-yellow-400/50',
