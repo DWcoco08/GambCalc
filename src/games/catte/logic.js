@@ -4,6 +4,7 @@ export function createCattePlayerState() {
   return {
     streak: 0,
     loseStreak: 0,
+    disabled: false,
   }
 }
 
@@ -13,11 +14,15 @@ export function calculateWin(players, winnerId, isInstant, baseBet = DEFAULT_BAS
 
   const newStreak = (winner.gameState?.streak || 0) + 1
   const multiplier = newStreak * (isInstant ? 2 : 1)
-  const otherPlayers = players.filter(p => p.id !== winnerId)
+  // Only active (not disabled) players participate
+  const activePlayers = players.filter(p => !p.gameState?.disabled)
+  const otherPlayers = activePlayers.filter(p => p.id !== winnerId)
   const winAmount = otherPlayers.length * baseBet * multiplier
 
   const changes = {}
   const updatedPlayers = players.map(p => {
+    // Disabled players untouched
+    if (p.gameState?.disabled) return p
     if (p.id === winnerId) {
       changes[p.id] = +winAmount
       return {

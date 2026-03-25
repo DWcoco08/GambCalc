@@ -5,7 +5,7 @@ import LogPanel from './LogPanel'
 import SummaryModal from './SummaryModal'
 import PlayerHistory from './PlayerHistory'
 
-export default function GameContainer({ gameId, match, onStartMatch, onAction, onUndo, onRedo, canUndo, canRedo, onEndMatch, onResetStreak }) {
+export default function GameContainer({ gameId, match, onStartMatch, onAction, onUndo, onRedo, canUndo, canRedo, onEndMatch, onResetStreak, onToggleDisabled, onAddPlayer }) {
   const [summary, setSummary] = useState(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [viewingPlayer, setViewingPlayer] = useState(null)
@@ -41,7 +41,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
           <div>
             <div className="text-xs font-bold text-gray-900 dark:text-white leading-tight">{game.name}</div>
             <div className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
-              Lượt {match.round} · {(match.baseBet / 1000)}k
+              Lượt {match.round}{match.baseBet > 0 ? ` · ${(match.baseBet / 1000)}k` : ''}
             </div>
           </div>
         </div>
@@ -106,6 +106,8 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
               onAction={onAction}
               onViewPlayer={setViewingPlayer}
               onResetStreak={onResetStreak}
+              onToggleDisabled={onToggleDisabled}
+              onAddPlayer={onAddPlayer}
               baseBet={match.baseBet}
               disabled={!match.active}
               match={match}

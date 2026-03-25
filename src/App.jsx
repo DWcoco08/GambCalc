@@ -12,7 +12,7 @@ import { getAllGames } from './games/registry'
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   useDarkMode()
-  const { match, startMatch, executeAction, undo, redo, canUndo, canRedo, endMatch, resetStreak } = useMatch()
+  const { match, startMatch, executeAction, undo, redo, canUndo, canRedo, endMatch, resetStreak, togglePlayerDisabled, addPlayer } = useMatch()
   const { user, profile, isLoggedIn, signOut, loading: authLoading } = useAuth()
   const navigate = useNavigate()
   const games = getAllGames()
@@ -149,7 +149,7 @@ export default function App() {
               <Route path="/login" element={<LoginPage />} />
               <Route
                 path="/game/:gameId"
-                element={<GameRoute match={match} startMatch={startMatch} executeAction={executeAction} undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} endMatch={endMatch} resetStreak={resetStreak} />}
+                element={<GameRoute match={match} startMatch={startMatch} executeAction={executeAction} undo={undo} redo={redo} canUndo={canUndo} canRedo={canRedo} endMatch={endMatch} resetStreak={resetStreak} togglePlayerDisabled={togglePlayerDisabled} addPlayer={addPlayer} />}
               />
               <Route path="/history" element={<HistoryPage />} />
             </Routes>
@@ -161,7 +161,7 @@ export default function App() {
   )
 }
 
-function GameRoute({ match, startMatch, executeAction, undo, redo, canUndo, canRedo, endMatch, resetStreak }) {
+function GameRoute({ match, startMatch, executeAction, undo, redo, canUndo, canRedo, endMatch, resetStreak, togglePlayerDisabled, addPlayer }) {
   const { gameId } = useParams()
   return (
     <GameContainer
@@ -175,6 +175,8 @@ function GameRoute({ match, startMatch, executeAction, undo, redo, canUndo, canR
       canRedo={canRedo}
       onEndMatch={endMatch}
       onResetStreak={resetStreak}
+      onToggleDisabled={togglePlayerDisabled}
+      onAddPlayer={addPlayer}
     />
   )
 }

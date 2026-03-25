@@ -223,6 +223,28 @@ export default function useMatch() {
     }))
   }, [match])
 
+  const togglePlayerDisabled = useCallback((playerId) => {
+    if (!match) return
+    setUndoStack(prev => [...prev, JSON.parse(JSON.stringify(match))])
+    setRedoStack([])
+    setMatch(prev => ({
+      ...prev,
+      players: prev.players.map(p =>
+        p.id === playerId
+          ? {
+              ...p,
+              gameState: {
+                ...p.gameState,
+                disabled: !p.gameState.disabled,
+                streak: !p.gameState.disabled ? 0 : p.gameState.streak, // reset streak when disabling
+                loseStreak: !p.gameState.disabled ? 0 : p.gameState.loseStreak,
+              },
+            }
+          : p
+      ),
+    }))
+  }, [match])
+
   return {
     match,
     startMatch,
@@ -234,6 +256,7 @@ export default function useMatch() {
     removePlayer,
     editPlayerName,
     resetStreak,
+    togglePlayerDisabled,
     canUndo: undoStack.length > 0,
     canRedo: redoStack.length > 0,
   }
