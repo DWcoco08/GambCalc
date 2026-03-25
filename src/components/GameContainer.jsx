@@ -41,7 +41,6 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
             names: winner.name,
             color: 'from-yellow-500 to-orange-500',
             border: 'border-yellow-400/50',
-            hasFire: 1,
             effect: () => screenShake(0.5),
           })
         }
