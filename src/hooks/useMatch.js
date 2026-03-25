@@ -95,8 +95,9 @@ export default function useMatch() {
     }
     if (!result || !result.players) return
 
-    const isNewHand = result.details?.action === 'Win' || result.details?.action === 'Ante'
-    const newRound = isNewHand && result.details?.action === 'Win' ? match.round + 1 : match.round
+    const winActions = ['Win', 'Instant Win', 'Win Pot']
+    const isWin = winActions.includes(result.details?.action)
+    const newRound = isWin ? match.round + 1 : match.round
 
     const playersWithAnim = result.players.map(p => ({
       ...p,
