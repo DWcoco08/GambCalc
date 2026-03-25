@@ -169,16 +169,9 @@ export function rainEffect(intensity = 1) {
 
 export function freezeEffect() {
   // Blue tint overlay
-  const ice = createOverlay('background:rgba(30,60,150,0.15);')
+  const ice = createOverlay('background:rgba(30,60,150,0.2);')
   gsap.fromTo(ice, { opacity: 0 }, { opacity: 1, duration: 0.5 })
   gsap.to(ice, { opacity: 0, duration: 1.5, delay: 2, onComplete: () => ice.remove() })
-
-  // Blur the root
-  const root = document.getElementById('root')
-  if (root) {
-    gsap.to(root, { filter: 'blur(2px) saturate(0.3) brightness(0.8)', duration: 0.5 })
-    gsap.to(root, { filter: 'none', duration: 1, delay: 2.5 })
-  }
 
   // Frost particles
   const container = createOverlay('')

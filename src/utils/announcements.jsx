@@ -157,55 +157,31 @@ export function useAnnouncements() {
   }, [])
 
   const checkMilestones = useCallback((playersBefore, playersAfter) => {
-    const winMilestones = {}
-    const loseMilestones = {}
-    const moneyMilestones = {}
+    // Collect in order: win first, then lose, then money
+    const announcements = []
 
+    // 1. WIN STREAKS (priority first)
+    const winByLevel = {}
     playersAfter.forEach(after => {
       const before = playersBefore.find(p => p.id === after.id)
       if (!before) return
-
       const streakBefore = before.gameState?.streak || 0
       const streakAfter = after.gameState?.streak || 0
-      const loseBefore = before.gameState?.loseStreak || 0
-      const loseAfter = after.gameState?.loseStreak || 0
-      const moneyBefore = before.money || 0
-      const moneyAfter = after.money || 0
-
       if (streakAfter > streakBefore && streakAfter >= 3) {
         const key = Math.min(streakAfter, 5)
-        if (!winMilestones[key]) winMilestones[key] = []
-        winMilestones[key].push({ name: after.name, streak: streakAfter })
-      }
-
-      if (loseAfter > loseBefore) {
-        for (const m of [30, 25, 20, 15, 10, 5]) {
-          if (loseAfter >= m && loseBefore < m) {
-            if (!loseMilestones[m]) loseMilestones[m] = []
-            loseMilestones[m].push(after.name)
-            break
-          }
-        }
-      }
-
-      if (moneyAfter < moneyBefore) {
-        for (const m of [200000, 100000, 50000]) {
-          if (Math.abs(moneyAfter) >= m && Math.abs(moneyBefore) < m) {
-            if (!moneyMilestones[m]) moneyMilestones[m] = []
-            moneyMilestones[m].push(after.name)
-            break
-          }
-        }
+        if (!winByLevel[key]) winByLevel[key] = []
+        winByLevel[key].push({ name: after.name, streak: streakAfter })
       }
     })
-
-    Object.entries(winMilestones).forEach(([level, players]) => {
+    // Sort by level ascending (3, 4, 5)
+    Object.keys(winByLevel).sort((a, b) => a - b).forEach(level => {
+      const players = winByLevel[level]
       const lvl = parseInt(level)
       const config = lvl >= 5 ? WIN_CONFIG[5] : WIN_CONFIG[lvl]
       if (!config) return
       const names = players.map(p => p.name).join(', ')
       const streak = players[0].streak
-      announce({
+      announcements.push({
         ...config,
         names,
         title: streak >= 6 ? `DEMON x${streak}!` : config.title,
@@ -213,17 +189,54 @@ export function useAnnouncements() {
       })
     })
 
-    Object.entries(loseMilestones).forEach(([level, names]) => {
+    // 2. LOSE STREAKS (second priority)
+    const loseByLevel = {}
+    playersAfter.forEach(after => {
+      const before = playersBefore.find(p => p.id === after.id)
+      if (!before) return
+      const loseBefore = before.gameState?.loseStreak || 0
+      const loseAfter = after.gameState?.loseStreak || 0
+      if (loseAfter > loseBefore) {
+        for (const m of [30, 25, 20, 15, 10, 5]) {
+          if (loseAfter >= m && loseBefore < m) {
+            if (!loseByLevel[m]) loseByLevel[m] = []
+            loseByLevel[m].push(after.name)
+            break
+          }
+        }
+      }
+    })
+    Object.keys(loseByLevel).sort((a, b) => a - b).forEach(level => {
       const config = LOSE_CONFIG[parseInt(level)]
       if (!config) return
-      announce({ ...config, names: names.join(', ') })
+      announcements.push({ ...config, names: loseByLevel[level].join(', ') })
     })
 
-    Object.entries(moneyMilestones).forEach(([amount, names]) => {
+    // 3. MONEY MILESTONES (last priority)
+    const moneyByAmount = {}
+    playersAfter.forEach(after => {
+      const before = playersBefore.find(p => p.id === after.id)
+      if (!before) return
+      const moneyBefore = before.money || 0
+      const moneyAfter = after.money || 0
+      if (moneyAfter < moneyBefore) {
+        for (const m of [200000, 100000, 50000]) {
+          if (Math.abs(moneyAfter) >= m && Math.abs(moneyBefore) < m) {
+            if (!moneyByAmount[m]) moneyByAmount[m] = []
+            moneyByAmount[m].push(after.name)
+            break
+          }
+        }
+      }
+    })
+    Object.keys(moneyByAmount).sort((a, b) => a - b).forEach(amount => {
       const config = MONEY_CONFIG[parseInt(amount)]
       if (!config) return
-      announce({ ...config, names: names.join(', ') })
+      announcements.push({ ...config, names: moneyByAmount[amount].join(', ') })
     })
+
+    // Announce all in order
+    announcements.forEach(a => announce(a))
   }, [announce])
 
   const ToastComponent = current ? (
