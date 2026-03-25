@@ -5,14 +5,14 @@ import LogPanel from './LogPanel'
 import SummaryModal from './SummaryModal'
 import PlayerHistory from './PlayerHistory'
 import { useAnnouncements } from '../utils/announcements'
-import { matchEndCelebration } from '../utils/effects'
+import { matchEndCelebration, screenFlash, screenShake } from '../utils/effects'
 
 export default function GameContainer({ gameId, match, onStartMatch, onAction, onUndo, onRedo, canUndo, canRedo, onEndMatch, onResetStreak, onToggleDisabled, onAddPlayer }) {
   const [summary, setSummary] = useState(null)
   const [showEndConfirm, setShowEndConfirm] = useState(false)
   const [viewingPlayer, setViewingPlayer] = useState(null)
   const [showLog, setShowLog] = useState(true)
-  const { checkMilestones, ToastComponent } = useAnnouncements()
+  const { announce, checkMilestones, ToastComponent } = useAnnouncements()
   const prevPlayersRef = useRef(null)
 
   // Wrap onAction to detect milestones (Catte only)
@@ -21,12 +21,29 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
       prevPlayersRef.current = JSON.parse(JSON.stringify(match.players))
     }
     onAction(playerId, actionId, customFn)
-    // Check milestones after a small delay (state needs to update)
+
     if (gameId === 'catte') {
+      // Tới trắng: flash vàng + toast
+      if (actionId === 'instant') {
+        screenFlash('rgba(250,204,21,0.4)', 0.3)
+        const winner = match?.players.find(p => p.id === playerId)
+        if (winner) {
+          announce({
+            icon: '⚡', title: 'TỚI TRẮNG!',
+            subtitle: 'Ăn trắng! Nhân đôi tiền thắng!',
+            names: winner.name,
+            color: 'from-yellow-500 to-orange-500',
+            border: 'border-yellow-400/50',
+            hasFire: 1,
+            effect: () => screenShake(0.5),
+          })
+        }
+      }
+
+      // Check milestones after state update
       setTimeout(() => {
         const prev = prevPlayersRef.current
         if (prev && match) {
-          // Get latest players from DOM-stored match
           const latest = JSON.parse(localStorage.getItem('gambcalc_current_match'))
           if (latest?.players) {
             checkMilestones(prev, latest.players)
@@ -34,7 +51,7 @@ export default function GameContainer({ gameId, match, onStartMatch, onAction, o
         }
       }, 100)
     }
-  }, [onAction, match, gameId, checkMilestones])
+  }, [onAction, match, gameId, checkMilestones, announce])
   const game = getGame(gameId)
 
   if (!game) {
